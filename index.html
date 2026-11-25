@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ruby · Chain Kit</title>
+<meta name="description" content="Ruby Chain Kit: the tools that make Robinhood Chain work, each with live data read from the chain.">
+<meta property="og:title" content="Ruby · Chain Kit">
+<meta property="og:description" content="The tools that make Robinhood Chain work, and Ruby's own: radar, clip, daily, memory, privacy and seal. Live data, read from the chain.">
+<meta property="og:url" content="https://rubykit.cc/">
+<link rel="canonical" href="https://rubykit.cc/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M9 6h14l6 7-13 16L3 13Z' fill='%23ff2a55'/%3E%3Cpath d='M3 13h26l-6-7H9Z' fill='%23ff7a95'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap">
+<style>
+:root{--bg:#0a0507;--panel:rgba(22,9,14,.82);--ink:#fbe9ee;--mute:#c79aa6;--dim:#7d5560;--line:rgba(255,120,150,.22);--ruby:#ff2a55;--ruby2:#ff6a8a;--hot:#ff0f47;--cream:#ffe6ec}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 12px/1.45 "JetBrains Mono",ui-monospace,monospace;overflow-x:hidden}
+a{color:inherit}
+/* frame */
+.kit{position:relative;min-height:100vh;display:grid;grid-template-rows:auto 1fr auto auto;padding:14px 18px 12px;gap:10px;max-width:1500px;margin:0 auto}
+.top{display:grid;grid-template-columns:1fr repeat(5,auto);gap:26px;align-items:end;border-bottom:1px solid var(--line);padding-bottom:10px}
+.brand{font:800 clamp(18px,2vw,26px)/1 "JetBrains Mono",monospace;letter-spacing:.02em}.brand span{color:var(--mute);font-weight:500}
+.brand small{display:block;margin-top:6px;font:500 10px "JetBrains Mono",monospace;letter-spacing:.14em;color:var(--dim)}
+.st{display:grid;gap:3px;text-align:left}.st small{font-size:9.5px;letter-spacing:.16em;color:var(--dim)}.st b{font-size:14px;font-weight:700;color:var(--ink)}.st b.r{color:var(--ruby)}
+/* stage */
+.stage{position:relative;min-height:560px;overflow:hidden;border-radius:4px}
+#burst{position:absolute;inset:0;width:100%;height:100%}
+.core{position:absolute;left:50%;top:50%;width:min(36vh,300px,62vw);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none}
+.core .ring{position:absolute;inset:0;border-radius:50%;border:1.5px solid var(--ring,rgba(255,140,165,.7));box-shadow:0 0 40px color-mix(in srgb,var(--ruby) 35%,transparent),inset 0 0 60px color-mix(in srgb,var(--ruby) 25%,transparent);background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--ruby) 22%,var(--bg)),var(--bg) 70%)}
+.core .ring2{position:absolute;inset:-14px;border-radius:50%;border:1px dashed rgba(255,140,165,.35);animation:spin 40s linear infinite}
+.core .lab{position:absolute;left:0;right:0;bottom:16%;text-align:center;font:700 10px "JetBrains Mono",monospace;letter-spacing:.24em;color:var(--mute)}
+.core .blk{position:absolute;left:0;right:0;top:15%;text-align:center;font:500 10px "JetBrains Mono",monospace;letter-spacing:.12em;color:var(--dim)}.core .blk b{color:var(--ink);font-weight:700}
+#gem{position:absolute;left:50%;top:48%;width:56%;height:56%;transform:translate(-50%,-50%)}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* floating notes */
+.note{position:absolute;font:500 10px/1.35 "JetBrains Mono",monospace;color:var(--mute);background:color-mix(in srgb,var(--bg) 90%,transparent);border:1px solid var(--line);border-radius:3px;padding:6px 8px;white-space:pre;pointer-events:none;transition:border-color .4s,color .4s,box-shadow .4s,transform .6s}
+.note.tag{padding:3px 7px;color:var(--ink);border-color:rgba(255,120,150,.4)}
+.note.hot{border-color:var(--ruby2);color:var(--ink);box-shadow:0 0 18px color-mix(in srgb,var(--ruby2) 50%,transparent)}
+.note .bars i{display:block;height:5px;margin:3px 0;background:linear-gradient(90deg,var(--ruby),#8a3cff00);border-radius:1px}
+/* spotlight card */
+.spot{position:absolute;z-index:5;width:min(380px,82vw);background:color-mix(in srgb,var(--bg) 94%,transparent);border:1px solid var(--ruby);box-shadow:0 0 0 1px color-mix(in srgb,var(--ruby) 25%,transparent),0 20px 60px -20px color-mix(in srgb,var(--ruby) 70%,transparent);border-radius:3px;transition:left .7s cubic-bezier(.2,.8,.2,1),top .7s cubic-bezier(.2,.8,.2,1),opacity .35s}
+.spot.fade{opacity:0}
+.spot .h{display:flex;justify-content:space-between;gap:10px;background:var(--ruby);color:#fff;padding:5px 10px;font-weight:800;letter-spacing:.04em}
+.spot .b{padding:9px 11px 10px}.spot .t{font-weight:700;color:var(--ink);font-size:12.5px}.spot .d{color:var(--mute);margin-top:4px}.spot .u{margin-top:6px;color:var(--dim);font-size:10.5px;overflow-wrap:anywhere}
+.spot .live{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap}.spot .live span{border:1px solid var(--line);border-radius:2px;padding:2px 6px;color:var(--cream)}
+/* panels */
+.panels{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.pn.rb{border-color:rgba(232,190,110,.35);background:linear-gradient(160deg,rgba(40,28,12,.85),var(--panel))}.pn.rb .ph b{color:#e8be6e}.pn.rb.on{border-color:#e8be6e;box-shadow:0 0 22px -6px #e8be6e}
+.spot.rb{border-color:#e8be6e;box-shadow:0 0 0 1px rgba(232,190,110,.3),0 20px 60px -20px rgba(232,190,110,.6)}.spot.rb .h{background:linear-gradient(90deg,#e8be6e,#c9953f);color:#1a1205}
+.note.rb{border-color:rgba(232,190,110,.45)}.note.rb.hot{border-color:#e8be6e;box-shadow:0 0 18px rgba(232,190,110,.5)}
+.cd.rb{border-color:rgba(232,190,110,.35)}.cd.rb .n{color:#c9953f}.cd code{margin-top:4px;font:500 11px "JetBrains Mono",monospace;color:var(--cream);background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:2px;padding:6px 8px;overflow-x:auto;white-space:nowrap}
+.pn{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:8px 10px;min-height:118px;transition:border-color .4s,box-shadow .4s;cursor:pointer;overflow:hidden}
+.pn.on{border-color:var(--ruby);box-shadow:0 0 22px -6px var(--ruby)}
+.pn .ph{display:flex;justify-content:space-between;font-size:9.5px;letter-spacing:.14em;color:var(--dim);margin-bottom:6px}.pn.on .ph b{color:var(--ruby)}.pn .ph b{font-weight:700;color:var(--mute)}
+.row{display:flex;justify-content:space-between;gap:8px;font-size:11px;padding:1.5px 0;color:var(--mute)}.row b{color:var(--ink);font-weight:500;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mbar{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--mute);padding:1.5px 0}.mbar span{width:58px;flex:none}.mbar i{flex:1;height:7px;background:rgba(255,255,255,.06);border-radius:1px;overflow:hidden}.mbar i u{display:block;height:100%;background:linear-gradient(90deg,var(--ruby),var(--ruby2));transition:width .8s}.mbar em{font-style:normal;width:62px;text-align:right;color:var(--ink)}
+.spark{width:100%;height:40px;display:block;margin-top:4px}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid var(--line);padding-top:8px;font-size:10.5px;color:var(--dim)}
+.prog{display:flex;gap:4px}.prog i{width:22px;height:4px;background:rgba(255,255,255,.1);border-radius:1px}.prog i.on{background:var(--ruby)}
+.foot .c{color:var(--ink);font-weight:700;letter-spacing:.08em}
+/* list below */
+.list{max-width:1500px;margin:0 auto;padding:40px 18px 60px}
+.list h2{font:800 clamp(26px,3.4vw,44px)/1 "JetBrains Mono",monospace;letter-spacing:-.02em;margin:0 0 8px}.list h2 em{font-style:normal;color:var(--ruby)}
+.list p.sub{color:var(--mute);max-width:640px;margin:0 0 24px;font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.cd{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:14px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:border-color .3s,transform .3s}.cd:hover{border-color:var(--ruby);transform:translateY(-3px)}
+.cd .n{font-size:10px;letter-spacing:.16em;color:var(--dim)}.cd b{font-size:15px}.cd span{color:var(--mute)}.cd small{color:var(--dim);overflow-wrap:anywhere}
+.note2{margin-top:22px;color:var(--dim);font-size:11px}
+@media (max-width:1200px){.panels{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:1000px){.top{grid-template-columns:1fr 1fr 1fr}.top .st:nth-child(n+5){display:none}.panels,.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.stage{min-height:520px}}
+@media (max-width:560px){.top{gap:12px}.top .st:nth-child(2){display:none}.brand small{display:none}.panels,.cards{grid-template-columns:minmax(0,1fr)}.note.far{display:none}.stage{min-height:480px}.top{grid-template-columns:1fr 1fr}.top .st:nth-child(n+4){display:none}}
+@media (prefers-reduced-motion:reduce){.core .ring2{animation:none}}
+.sealbox{margin-top:26px;border:1px solid rgba(232,190,110,.4);border-radius:3px;background:linear-gradient(160deg,rgba(40,28,12,.7),var(--panel))}
+.sh{background:linear-gradient(90deg,#e8be6e,#c9953f);color:#1a1205;font-weight:800;letter-spacing:.06em;padding:7px 12px}
+.sg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;padding:16px}
+.drop{display:block;border:1px dashed var(--line);border-radius:3px;padding:12px;cursor:pointer;color:var(--mute)}.drop input{display:none}.drop:hover{border-color:#e8be6e;color:var(--ink)}
+.sealbox textarea,.sealbox input#stx{width:100%;margin-top:8px;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:3px;color:var(--ink);font:500 12px "JetBrains Mono",monospace;padding:10px;outline:none}.sealbox textarea{height:90px;resize:vertical}
+.srow{margin-top:8px;color:var(--dim);overflow-wrap:anywhere}.srow b{color:var(--cream);font-weight:500}
+.sact{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}.sact input#stx{flex:1;margin:0;min-width:0}
+.sealbox button{font:700 12px "JetBrains Mono",monospace;background:#e8be6e;color:#1a1205;border:0;border-radius:3px;padding:10px 14px;cursor:pointer}.sealbox button:disabled{opacity:.4;cursor:default}.sealbox button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.hint{color:var(--dim);font-size:10.5px}.slog{font-size:11.5px;line-height:1.7;color:var(--mute);min-height:80px;overflow-wrap:anywhere}.slog .ok{color:#e8be6e}.slog .no{color:#ff6b80}.slog a{color:var(--cream)}
+@media (max-width:800px){.sg{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- site chrome: one page per menu ---------- */
+.site{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.site .in{max-width:1500px;margin:0 auto;padding:0 18px;height:54px;display:flex;align-items:center;gap:18px}
+.site .lg{display:flex;align-items:center;gap:9px;font:800 17px "JetBrains Mono",monospace;text-decoration:none;color:var(--ink)}
+.site nav{display:flex;gap:2px;margin-left:auto;overflow-x:auto;scrollbar-width:none}.site nav a{font:600 11.5px "JetBrains Mono",monospace;text-decoration:none;color:var(--mute);padding:7px 10px;border-radius:3px;white-space:nowrap}.site nav a:hover{color:var(--ink)}.site nav a.on{color:#1a1205;background:#e8be6e}
+#bgm{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.5}
+.view{display:none;position:relative;z-index:1}.view.on{display:block}
+.page{max-width:1500px;margin:0 auto;padding:44px 18px 70px}
+.ph2 .ey{font:700 11px "JetBrains Mono",monospace;letter-spacing:.2em;color:#e8be6e}.ph2 h1{font:800 clamp(30px,4.4vw,58px)/1 "JetBrains Mono",monospace;letter-spacing:-.03em;margin:10px 0 10px}.ph2 h1 em{font-style:normal;color:var(--ruby)}.ph2 p{color:var(--mute);max-width:720px;margin:0;font-size:13.5px}
+.box{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:16px}
+.box.gold{border-color:rgba(232,190,110,.4);background:linear-gradient(160deg,rgba(40,28,12,.7),var(--panel))}
+.code{background:rgba(0,0,0,.4);border:1px solid var(--line);border-radius:3px;padding:12px;font:500 12px/1.7 "JetBrains Mono",monospace;color:var(--cream);white-space:pre;overflow-x:auto;margin-top:10px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.inp{display:flex;gap:8px;margin-top:12px}.inp input{flex:1;min-width:0;background:rgba(0,0,0,.4);border:1px solid var(--line);border-radius:3px;color:var(--ink);font:500 12.5px "JetBrains Mono",monospace;padding:11px 12px;outline:none}.inp input:focus{border-color:#e8be6e}
+.btn{font:700 12px "JetBrains Mono",monospace;background:#e8be6e;color:#1a1205;border:0;border-radius:3px;padding:0 16px;cursor:pointer}.btn.r{background:var(--ruby);color:#fff}
+.mini{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.mini button{font:600 11px "JetBrains Mono",monospace;background:transparent;color:var(--mute);border:1px solid var(--line);border-radius:2px;padding:4px 9px;cursor:pointer}.mini button:hover{color:var(--ink);border-color:#e8be6e}
+.lg2{font-size:11.5px;line-height:1.8;color:var(--mute);margin-top:10px;min-height:40px}.lg2 .ok::before,.lg2 .ok2::before{content:"✓ ";color:#e8be6e}.lg2 .no{color:#ff6b80}
+.paper{background:#fffaf2;color:#2a1d10;border-radius:3px;overflow:hidden;box-shadow:0 30px 70px -35px rgba(232,190,110,.6)}
+.paper .nb{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#f1e5d1;font:600 11.5px "JetBrains Mono",monospace;color:#7a6246}
+.paper .fm{margin:0;padding:12px 14px;background:#f8efe1;border-bottom:1px solid #e8dac3;font:500 11.5px/1.6 "JetBrains Mono",monospace;color:#8a7356;white-space:pre-wrap;overflow-wrap:anywhere;max-height:170px;overflow:auto}
+.paper .md{padding:4px 14px 16px;max-height:560px;overflow:auto;font-family:"JetBrains Mono",monospace}.paper .md h3{font-size:20px;margin:14px 0 6px;color:#1f150a}.paper .md h4{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#b8102f;margin:16px 0 6px}.paper .md p{font-size:12.5px;color:#6b5640;margin:6px 0}
+.paper .md table{width:100%;border-collapse:collapse;font-size:11.5px}.paper .md td,.paper .md th{border-bottom:1px solid #eee0c9;padding:5px 6px 5px 0;text-align:left;overflow-wrap:anywhere}.paper .md th{color:#9a8264}.paper .md a{color:#1f150a;text-decoration-color:#d61f45}
+/* radar */
+.rtable{margin-top:22px;border:1px solid var(--line);border-radius:3px;overflow:hidden;background:var(--panel)}
+.rrow{display:grid;grid-template-columns:80px minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) 110px 90px 90px minmax(0,1.4fr);gap:10px;align-items:center;padding:11px 14px;border-top:1px solid var(--line);font-size:12px;cursor:pointer}.rrow:hover{background:rgba(232,190,110,.06)}
+.rrow.h{cursor:default;border-top:0;color:var(--dim);font-size:10px;letter-spacing:.14em;text-transform:uppercase}.rrow .sym{font-weight:800;color:var(--ink)}.rrow .sym small{display:block;font-weight:500;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rrow .muted{color:var(--mute)}.rrow .bs b{color:var(--ruby)}.rrow .bs i{font-style:normal;color:#e8be6e}
+.rrow.new{animation:fl 1.6s}.rrow.tick{animation:tk 1s}@keyframes fl{0%{background:rgba(214,31,69,.35)}}@keyframes tk{0%{background:rgba(232,190,110,.15)}}
+.chip{display:inline-block;font:700 9.5px "JetBrains Mono",monospace;letter-spacing:.05em;border-radius:2px;padding:2px 6px;margin:1px 4px 1px 0;white-space:nowrap}.chip.r{background:rgba(214,31,69,.2);color:#ff7a90}.chip.g{background:rgba(232,190,110,.16);color:#e8be6e}.chip.n{border:1px solid var(--line);color:var(--mute)}
+.bar{height:4px;border-radius:1px;background:rgba(255,255,255,.08);margin-top:5px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ruby),#e8be6e)}
+.rstat{display:flex;gap:28px;margin-top:20px}.rstat div{font-size:10.5px;color:var(--dim);letter-spacing:.1em}.rstat b{display:block;font-size:30px;color:var(--ink);letter-spacing:-.02em}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(460px,100vw);z-index:60;background:#fffaf2;color:#2a1d10;transform:translateX(105%);transition:transform .45s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}.drawer.on{transform:none;box-shadow:-30px 0 80px rgba(0,0,0,.5)}
+.dbar{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#f1e5d1;font:600 11.5px "JetBrains Mono",monospace;color:#7a6246}.dbar span{flex:1}.dbar button{border:0;background:#2a1d10;color:#fff;border-radius:2px;font:700 11px "JetBrains Mono",monospace;padding:6px 10px;cursor:pointer}
+.dbody{flex:1;overflow:auto;padding:4px 18px 22px;font-family:"JetBrains Mono",monospace}.dbody pre.fm{margin:12px 0 0;padding:10px 12px;background:#f8efe1;border-radius:2px;font-size:11.5px;line-height:1.6;color:#8a7356;white-space:pre-wrap;overflow-wrap:anywhere}
+.dbody h3{font-size:20px;margin:14px 0 4px}.dbody h4{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#b8102f;margin:16px 0 6px}.dbody p{font-size:12.5px;color:#6b5640;margin:6px 0}.dbody a{color:#1f150a}
+.dbody table{width:100%;border-collapse:collapse;font-size:11.5px}.dbody td,.dbody th{border-bottom:1px solid #eee0c9;padding:5px 6px 5px 0;text-align:left;overflow-wrap:anywhere}.dbody th{color:#9a8264}
+.dbody .act{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}.dbody .act button{border:1px solid #2a1d10;background:transparent;border-radius:2px;font:700 11px "JetBrains Mono",monospace;padding:8px 11px;cursor:pointer}.dbody .act button.pri{background:#d61f45;border-color:#d61f45;color:#fff}
+.flag{display:inline-block;font:700 10px "JetBrains Mono",monospace;border-radius:2px;padding:2px 7px;margin:2px 4px 2px 0}.flag.r{background:#ffe1e6;color:#b0102c}.flag.g{background:#f3e6c6;color:#7a5410}.flag.n{background:#efe6da;color:#6b5640}
+/* memory chat */
+.term2{background:rgba(0,0,0,.45);border:1px solid var(--line);border-radius:3px;padding:14px;min-height:380px;font-size:12px;line-height:1.65}.msg{margin:0 0 12px;opacity:0;transform:translateY(8px);transition:.4s}.msg.on{opacity:1;transform:none}.msg .who{font-size:10px;letter-spacing:.14em;color:var(--dim)}.msg.u .t{color:var(--ink)}.msg.a .t{color:var(--mute)}.msg.c .t{color:#e8be6e}.msg.c .t::before{content:"⚙ "}.msg.r .t{color:#f6e3b4;white-space:pre-wrap}
+.tl{display:grid;gap:8px}.tl div{display:flex;gap:12px;align-items:baseline;border:1px solid var(--line);border-radius:3px;padding:10px 12px;background:rgba(0,0,0,.25)}.tl code{flex:none;width:130px;color:#e8be6e;font-weight:700}.tl span{color:var(--mute)}
+.home-links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;max-width:1500px;margin:0 auto;padding:30px 18px 60px}
+@media (max-width:1000px){.grid2,.grid3{grid-template-columns:minmax(0,1fr)}.rrow{grid-template-columns:64px minmax(0,1.4fr) 92px minmax(0,1.2fr)}.rrow .c3,.rrow .c4,.rrow .c6,.rrow .c7{display:none}.home-links{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.home-links{grid-template-columns:minmax(0,1fr)}.rrow{grid-template-columns:minmax(0,1.3fr) 80px minmax(0,1fr)}.rrow .c1{display:none}}
+</style>
+</head>
+<body>
+<header class="site"><div class="in"><a class="lg" href="/"><svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><path d="M9 6h14l6 7-13 16L3 13Z" fill="#d61f45"/><path d="M3 13h26l-6-7H9Z" fill="#e8be6e"/></svg>RUBY</a><nav aria-label="Main"><a href="/">Home</a><a href="/chain">Chain</a><a href="/radar">Radar</a><a href="/clip">Clip</a><a href="/daily">Daily</a><a href="/memory">Memory</a><a href="/privacy">Privacy</a><a href="/seal">Seal</a><a href="/start">Start</a></nav></div></header>
+<canvas id="bgm" aria-hidden="true"></canvas>
+<main>
+<section class="view" id="home"><div class="kit" style="position:relative;z-index:1">
+  <div class="top">
+    <div class="brand">RUBY <span>/ CHAIN KIT</span><small>ROBINHOOD CHAIN · 8 CHAIN TOOLS + 7 RUBY TOOLS · LIVE</small></div>
+    <div class="st"><small>TOOLS</small><b id="sN">1/15</b></div>
+    <div class="st"><small>BLOCK</small><b id="sB">…</b></div>
+    <div class="st"><small>CHAIN ID</small><b>4663</b></div>
+    <div class="st"><small>NOW SHOWING</small><b class="r" id="sNow">rpc</b></div>
+    <div class="st"><small>DATA</small><b>live</b></div>
+  </div>
+
+  <div class="stage" id="stage">
+    <canvas id="burst" aria-hidden="true"></canvas>
+    <div id="notes"></div>
+    <div class="core"><div class="ring2"></div><div class="ring"></div><canvas id="gem" aria-hidden="true"></canvas><div class="blk">BLOCK <b id="cB">…</b></div><div class="lab">ROBINHOOD CHAIN</div></div>
+    <div class="spot" id="spot"><div class="h"><span id="spN">01 / RPC</span><span id="spS">…</span></div><div class="b"><div class="t" id="spT"></div><div class="d" id="spD"></div><div class="live" id="spL"></div><div class="u" id="spU"></div></div></div>
+  </div>
+
+  <div class="panels" id="panels"></div>
+
+  <div class="foot"><span>ruby chain kit · every number on this page is read from Robinhood Chain mainnet as you watch</span><span class="prog" id="prog"></span><span class="c" id="fC">01 / 15 · rpc</span></div>
+</div><div class="home-links"><a class="cd rb" href="/radar"><span class="n">RADAR</span><b>Every launch, dissected</b><span>dev buy, holds or sold, traders, live</span></a><a class="cd rb" href="/clip"><span class="n">CLIP</span><b>Paste a contract</b><span>a fact note, written in your browser</span></a><a class="cd rb" href="/daily"><span class="n">DAILY</span><b>Your wallet, every day</b><span>balances, value, transfers</span></a><a class="cd rb" href="/seal"><span class="n">SEAL</span><b>Prove a note</b><span>its hash on chain, from your wallet</span></a><a class="cd rb" href="/memory"><span class="n">MEMORY</span><b>An AI that remembers</b><span>six MCP tools into your vault</span></a><a class="cd rb" href="/privacy"><span class="n">PRIVACY</span><b>Lock and look</b><span>encrypted notes, your footprint</span></a><a class="cd" href="/chain"><span class="n">CHAIN</span><b>Eight chain tools</b><span>the pieces that make it work</span></a><a class="cd rb" href="/start"><span class="n">START</span><b>Three commands</b><span>install nothing, run with npx</span></a></div></section>
+<section class="view" id="chain"><div class="page"><div class="ph2"><div class="ey">CHAIN</div><h1>Eight tools. <em>One chain.</em></h1><p>The pieces that make Robinhood Chain usable, each checked live. A starting list, open to change. Ruby is not affiliated with any of them, and inclusion is not an endorsement.</p></div><div class="cards" id="cards"></div></div></section>
+<section class="view" id="radar"><div class="page"><div class="ph2"><div class="ey">R1 · RADAR</div><h1>Every launch, <em>dissected live.</em></h1><p>The latest launches on the Pons launchpad, straight from its events: what the creator bought, whether they still hold it or sold it, who trades it and how much ETH sits in the curve. Facts with links, never a score.</p></div><div class="rstat"><div><b id="rCount">–</b>LAUNCHES SHOWN</div><div><b id="rTr">–</b>TRADERS</div><div><b id="rSold">–</b>DEVS SOLD</div></div>
+<div class="rtable" id="rtable"><div class="rrow h"><span class="c1">launched</span><span>token</span><span class="c3">creator</span><span class="c4">dev buy</span><span>dev now</span><span class="c6">buys/sells</span><span class="c7">ETH in curve</span><span>facts</span></div></div>
+<p class="note2">Updates every 15 seconds from the launchpad's own events. Click a row for its note. "dev now" is what the creator's wallet holds today. In your terminal: <code>ruby radar</code> writes the same as a Markdown note.</p></div></section>
+<section class="view" id="clip"><div class="page"><div class="ph2"><div class="ey">R2 · CLIP</div><h1>Paste a contract. <em>Get the facts.</em></h1><p>Your browser reads Robinhood Chain and Sourcify and writes the same note ruby clip writes: verification, owner, first mint, supply, burns, holders and price.</p></div><div class="grid2" style="margin-top:22px;align-items:start">
+<div><div class="box gold"><b>Paste a token contract</b><div class="inp"><input id="ca" placeholder="0x… token contract address" spellcheck="false" autocomplete="off"><button class="btn" id="go" type="button">Clip ▸</button></div><div class="mini" id="chips"></div><div class="lg2" id="log" aria-live="polite"></div></div>
+<div class="box"><b>In your terminal</b><div class="code">npx -y github:rubykit-star/ruby clip 0x…token</div><p class="note2" style="margin-top:10px">Writes Tokens/&lt;symbol&gt; &lt;address&gt;.md in your vault. Facts with links, never a score.</p></div></div>
+<div class="paper"><div class="nb"><span id="nfile">Tokens/… .md</span></div><pre class="fm" id="nfm">paste an address or pick a token</pre><div class="md" id="nmd"><p>The note appears here, written from Robinhood Chain in your browser.</p></div><div style="padding:0 14px 12px;font:500 11px 'JetBrains Mono',monospace;color:#9a8264" id="ncap"></div></div></div></div></section>
+<section class="view" id="daily"><div class="page"><div class="ph2"><div class="ey">R3 · DAILY</div><h1>Your wallet, <em>written down.</em></h1><p>A note a day per wallet. Try it with any address: the balances and their value are read live, nothing is connected or signed.</p></div><div class="grid2" style="margin-top:22px;align-items:start">
+<div><div class="box gold"><b>Paste a wallet address</b> <span class="note2">read only, no wallet connection</span><div class="inp"><input id="dw" placeholder="0x… wallet address" spellcheck="false" autocomplete="off"><button class="btn" id="dgo" type="button">Read ▸</button></div><div class="mini"><button type="button" id="dex">example: the burn address</button></div><div class="lg2" id="dlog"></div></div>
+<div class="box"><b>Every day, in your terminal</b><div class="code">npx -y github:rubykit-star/ruby daily 0x…wallet --label main</div><p class="note2" style="margin-top:10px">Writes Daily/&lt;date&gt; &lt;label&gt;.md with balances, value in USDG, the last 24 hours of token transfers, and the change since your previous note. Put your wallets in ruby.json and run it each morning.</p></div></div>
+<div class="paper"><div class="nb"><span id="dfile2">Daily/… .md</span></div><div class="md" id="dmd"><p>Holdings and value appear here, read live from Robinhood Chain.</p></div></div></div></div></section>
+<section class="view" id="memory"><div class="page"><div class="ph2"><div class="ey">R4 · MEMORY</div><h1>An AI that <em>remembers the chain.</em></h1><p>Run ruby mcp and your agent gets six tools: it reads Robinhood Chain, writes what it finds as Markdown notes in your vault, and recalls them next time.</p></div><div class="grid2" style="margin-top:22px;align-items:start"><div>
+<div class="tl"><div><code>ruby_radar</code><span>latest launches as a note</span></div><div><code>ruby_clip</code><span>fact note for any token</span></div><div><code>ruby_daily</code><span>today's note for a wallet</span></div><div><code>ruby_remember</code><span>save a thought to Memory/</span></div><div><code>ruby_recall</code><span>search every note</span></div><div><code>ruby_read</code><span>open one note (inside the vault only)</span></div></div>
+<div class="box"><b>Add it to Claude Desktop, Cursor or any MCP client</b><div class="code">{ "mcpServers": { "ruby": {
+  "command": "npx",
+  "args": ["-y", "github:rubykit-star/ruby", "mcp", "--vault", "/path/to/my-vault"]
+} } }</div></div></div>
+<div><div class="term2" id="chat"></div><p class="note2">Example session, typed out. Your agent only reads the chain and writes into your vault.</p></div></div></div></section>
+<section class="view" id="privacy"><div class="page"><div class="ph2"><div class="ey">R6 · PRIVACY</div><h1>Lock your notes. <em>See your footprint.</em></h1><p>Your research stays yours, encrypted on your machine. And a plain look at what your wallet already shows the world, so you can show less.</p></div><div class="grid2" style="margin-top:22px;align-items:start">
+<div class="box gold"><b>Lock your notes</b><p class="note2" style="margin-top:8px">Every note in the vault is encrypted with your password (AES-256-GCM, key from scrypt), on your own machine. Safe to keep in a cloud folder or in git. Ruby checks each file decrypts back to the same bytes before it removes the plain copy, and a wrong password changes nothing.</p><div class="code">npx -y github:rubykit-star/ruby lock
+npx -y github:rubykit-star/ruby unlock</div><p class="note2">Lose the password and the notes cannot be opened. Nobody can reset it.</p></div>
+<div class="box"><b>See your footprint</b><p class="note2" style="margin-top:8px">What anyone can already read about a wallet: who it moves tokens with, the hours it is active, what it holds and which approvals are still open. Gathered so you can see your own exposure, then act on it.</p><div class="code">npx -y github:rubykit-star/ruby footprint 0x…your-wallet
+npx -y github:rubykit-star/ruby footprint 0x… --days 90</div></div></div>
+<div class="grid3" style="margin-top:14px"><div class="box"><b>Local first</b><p class="note2">This site has no trackers and no analytics. Clip, Daily and Seal run in your browser and read the chain directly. Nothing is sent to a Ruby server, there isn't one.</p></div><div class="box"><b>Your RPC</b><p class="note2">Every read goes to a public Robinhood Chain RPC, which sees your IP. Use your own endpoint with RUBY_RPC.</p></div><div class="box"><b>What Ruby can't do</b><p class="note2">A public chain stays public. Ruby cannot hide transactions, and it will not mix funds. It helps you see what shows and keep your own notes private.</p></div></div>
+<div class="box"><b>Ways to show less</b><p class="note2">Keep a separate wallet per purpose. Fund a new wallet from a source not linked to your main one, and don't send between them directly. Revoke approvals you no longer use.</p></div></div></section>
+<section class="view" id="seal"><div class="page"><div class="ph2"><div class="ey">R7 · SEAL</div><h1>Prove a note. <em>Without showing it.</em></h1><p>Seal the SHA-256 of a note on Robinhood Chain from your own wallet. Later anyone can check the note is unchanged since that block. The only Ruby tool that writes, and it is simulated first.</p></div><div class="sealbox" id="seal">
+    <div class="sh">SEAL A NOTE · CHECK A SEAL</div>
+    <div class="sg">
+      <div>
+        <p class="sub" style="margin:0 0 12px">Pick a note. Your browser hashes it (SHA-256); the note itself never leaves your computer. Then seal the hash from your wallet, or check an existing seal.</p>
+        <label class="drop"><input type="file" id="sfile"><span id="sfname">Choose a note (.md or any file)</span></label>
+        <textarea id="stext" placeholder="…or paste the text of a note here" spellcheck="false"></textarea>
+        <div class="srow">sha-256 <b id="shash">–</b></div>
+      </div>
+      <div>
+        <div class="sact"><button type="button" id="sgo" disabled>Seal from my wallet</button><span class="hint">0 ETH to yourself, data = ruby-seal:hash · simulated on mainnet first</span></div>
+        <div class="sact"><input id="stx" placeholder="0x… seal transaction to check" spellcheck="false"><button type="button" id="sver" disabled>Verify</button></div>
+        <div class="slog" id="slog" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
+<div class="grid3" style="margin-top:14px"><div class="box"><b>How it works</b><p class="note2">Your browser computes the note's SHA-256. A 0 ETH transaction from your wallet to itself carries "ruby-seal:" + that hash. The block time is the date.</p></div><div class="box"><b>Private by design</b><p class="note2">Only the hash goes on chain. Nobody can read the note from it, and change one character and the hash no longer matches.</p></div><div class="box"><b>In your terminal</b><div class="code">ruby seal note.md
+ruby verify note.md 0x…tx</div></div></div></div></section>
+<section class="view" id="start"><div class="page"><div class="ph2"><div class="ey">R5 · START</div><h1>Take Ruby <em>home.</em></h1><p>The whole kit from your terminal. Every note is a plain Markdown file in a vault you own. Read only, except Seal.</p></div><div class="box gold"><b>Three commands. Node 18 or newer. Nothing to install.</b><div class="code">npx -y github:rubykit-star/ruby init my-vault
+cd my-vault
+npx -y github:rubykit-star/ruby radar</div></div>
+<div class="cards" id="rcards"></div>
+<div class="box"><b>Every command</b><div class="code">ruby init [folder]            a vault: Daily, Wallets, Tokens, Radar, Memory, Privacy, Seals, Research, Templates
+ruby radar [--count 15]       the latest launchpad launches, as one note
+ruby clip &lt;token&gt;             facts about a token
+ruby daily [wallet]           today's note for a wallet, or every wallet in ruby.json
+ruby mcp                      memory server for AI agents (MCP)
+ruby footprint &lt;wallet&gt;      what the public can read about a wallet
+ruby lock | ruby unlock       encrypt or decrypt every note with a password
+ruby seal &lt;note&gt;              the hash and data to seal a note on chain
+ruby verify &lt;note&gt; &lt;tx&gt;       check a seal</div></div>
+<div class="box"><b>Skills for Claude</b><p class="note2">Copy ruby-daily, ruby-check-token and ruby-weekly from skills/ into your Claude skills folder, then ask "write my daily note" or paste a token address.</p></div></div></section>
+</main>
+<footer style="position:relative;z-index:1;border-top:1px solid var(--line);padding:22px 18px 34px;font-size:11px;color:var(--dim);text-align:center">rubykit.cc · Robinhood Chain mainnet · read only except Seal · not affiliated with the tools it reads · MIT</footer>
+<aside class="drawer" id="drawer" aria-live="polite"><div class="dbar"><span id="dfile">note.md</span><button type="button" id="dclose">Close ✕</button></div><div class="dbody" id="dbody"></div></aside>
+<script>
+
+// ---------- color themes: ?t=a (ruby on black), ?t=b (black, ruby and gold), ?t=e (deep violet and pink) ----------
+const THEMES = {
+  a: { css: { "--bg": "#0a0507", "--panel": "rgba(22,9,14,.82)", "--ink": "#fbe9ee", "--mute": "#c79aa6", "--dim": "#7d5560", "--line": "rgba(255,120,150,.22)", "--ruby": "#ff2a55", "--ruby2": "#ff6a8a", "--cream": "#ffe6ec" },
+       thr: (w) => `rgba(255,${40 + w * 60},${85 + w * 50},${0.06 + w * 0.13})`, cold: "rgba(255,90,130,.16)", hot: "rgba(255,120,150,.62)", web: "rgba(255,120,150,.1)", glow: "255,42,85", ring: "rgba(255,140,165,.7)", gem: [120, 10, 50] },
+  b: { css: { "--bg": "#0a0806", "--panel": "rgba(20,15,9,.85)", "--ink": "#f6ead2", "--mute": "#c4a77a", "--dim": "#7a6646", "--line": "rgba(232,190,110,.22)", "--ruby": "#d61f45", "--ruby2": "#e8be6e", "--cream": "#f6e3b4" },
+       thr: (w) => `rgba(${220 + w * 30},${170 + w * 40},${90 + w * 40},${0.05 + w * 0.12})`, cold: "rgba(232,190,110,.16)", hot: "rgba(255,215,140,.7)", web: "rgba(232,190,110,.1)", glow: "214,31,69", ring: "rgba(232,190,110,.75)", gem: [120, 8, 40] },
+  e: { css: { "--bg": "#0d0618", "--panel": "rgba(24,12,40,.84)", "--ink": "#f4e8ff", "--mute": "#b9a0d8", "--dim": "#6e5a8c", "--line": "rgba(200,120,255,.24)", "--ruby": "#ff3fb0", "--ruby2": "#c58bff", "--cream": "#f3dcff" },
+       thr: (w) => `rgba(${230 + w * 25},${50 + w * 70},${170 + w * 60},${0.06 + w * 0.13})`, cold: "rgba(220,90,255,.16)", hot: "rgba(255,120,220,.65)", web: "rgba(200,120,255,.1)", glow: "200,60,255", ring: "rgba(220,140,255,.7)", gem: [120, 30, 130] },
+};
+const TK = (new URLSearchParams(location.search).get("t") || "b").toLowerCase(), TH_ = THEMES[TK] || THEMES.a;
+for (const [k, v] of Object.entries(TH_.css)) document.documentElement.style.setProperty(k, v); document.documentElement.style.setProperty("--ring", TH_.ring);
+const RPC = "https://rpc.mainnet.chain.robinhood.com", EXP = "https://robinhoodchain.blockscout.com";
+const USDG = "0x5fc5360d0400a0fd4f2af552add042d716f1d168", NVDA = "0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec", PONS = "0xe33e9e479df8802cb0866d5d05258bec4cf62948", RAMSES = "0xE0c4ceb92d08CA985bB70fe0a22fEb121A9854A8";
+const T_LAUNCH = "0xdcacba5e347ae7abd91cb519eb877af8fa7774e347b85dd3ddcd24a2ba8cdf37";
+const STOCKS = ["NVDA", "TSLA", "AAPL", "AMZN", "GOOGL", "META", "MSFT", "SPY", "QQQ", "GLD", "COIN", "MSTR"];
+const $ = (i) => document.getElementById(i), still = matchMedia("(prefers-reduced-motion: reduce)").matches, hex = (n) => "0x" + n.toString(16);
+const rpc = async (m, p) => { for (let k = 0; k < 4; k++) { try { const r = await fetch(RPC, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: m, params: p }) }); const j = await r.json(); if (j.error) throw new Error(j.error.message); return j.result; } catch (e) { if (k === 3) throw e; await new Promise((r) => setTimeout(r, 500 * (k + 1))); } } };
+const D = { latest: null, deadUsdg: null, block: 0, txs: 0, gas: 0, bt: 0.105, usdg: null, launches: null, quote: null, venues: [], verNVDA: null, verRam: null, verPons: null, blocks: [] };
+
+// the eight tools: what they are, where they live, and which live numbers show for each
+const TOOLS = [
+  { k: "rpc", name: "Robinhood Chain RPC", d: "the public endpoint every wallet and app talks to", u: "rpc.mainnet.chain.robinhood.com", s: () => D.block ? "#" + D.block.toLocaleString("en-US") : "…", live: () => [`block ${D.block.toLocaleString("en-US")}`, `${D.bt.toFixed(3)} s / block`] },
+  { k: "explorer", name: "Blockscout explorer", d: "open any address, token or transaction on the chain", u: "robinhoodchain.blockscout.com", s: () => D.txs + " tx", live: () => [`latest block ${D.txs} tx`, `gas ${D.gas.toLocaleString("en-US")}`] },
+  { k: "sourcify", name: "Sourcify", d: "proves the code on chain matches the source", u: "sourcify.dev · chain 4663", s: () => (D.verNVDA ? "match" : "…"), live: () => [`NVDA token: ${D.verNVDA || "…"}`, `Pons factory: ${D.verPons || "…"}`] },
+  { k: "usdg", name: "USDG · Global Dollar", d: "the chain's dollar, with transfer-by-signature (EIP-3009)", u: USDG, s: () => (D.usdg ? (D.usdg / 1e6).toFixed(1) + "M" : "…"), live: () => [`supply ${D.usdg ? Math.round(D.usdg).toLocaleString("en-US") : "…"}`, "6 decimals"] },
+  { k: "stocks", name: "Stock tokens", d: "NVDA, TSLA, SPY and more as tokens on chain", u: "12 stocks and ETFs + ETH, BTC", s: () => (D.quote ? "$" + (100 / D.quote).toFixed(2) : "…"), live: () => [`NVDA ${D.quote ? (100 / D.quote).toFixed(2) + " USDG" : "…"}`, "14 markets"] },
+  { k: "router", name: "KyberSwap aggregator", d: "finds the best route across the chain's DEXes", u: "aggregator-api.kyberswap.com/robinhood", s: () => D.venues.length + " venues", live: () => [`100 USDG → ${D.quote ? D.quote.toFixed(4) : "…"} NVDA`, ...D.venues.slice(0, 2)] },
+  { k: "launchpad", name: "Pons launchpad", d: "bonding-curve token launches, read from its events", u: PONS, s: () => (D.launches != null ? D.launches + " / 3h" : "…"), live: () => [`${D.launches ?? "…"} launches, last ~3 h`, `factory ${D.verPons || "…"}`] },
+  { k: "dex", name: "Ramses V3", d: "a concentrated-liquidity DEX with a verified factory", u: RAMSES, s: () => D.verRam || "…", live: () => [`factory: ${D.verRam || "…"}`, "in the router's routes"] },
+  { k: "radar", ruby: 1, name: "Ruby Radar", d: "every new launch dissected: dev buy, dev still holds or sold, traders", u: "ruby radar", s: () => (D.latest ? D.latest.sym : "…"), live: () => [D.latest ? `latest ${D.latest.sym} · dev ${D.latest.dev} ETH` : "reading launches…", `${D.launches ?? "…"} launches / 3 h`] },
+  { k: "clip", ruby: 1, name: "Ruby Clip", d: "paste a contract, get a fact note: verified, owner, mint, supply, holders", u: "ruby clip 0x…", s: () => "facts", live: () => [`NVDA: ${D.verNVDA || "…"}`, "no scores, only links"] },
+  { k: "daily", ruby: 1, name: "Ruby Daily", d: "a note for your wallet every day: balances, value, 24 h of transfers", u: "ruby daily", s: () => "daily", live: () => [`example wallet ${D.deadUsdg != null ? Math.round(D.deadUsdg).toLocaleString("en-US") + " USDG" : "…"}`, "plain .md"] },
+  { k: "memory", ruby: 1, name: "Ruby Memory", d: "your AI reads the chain, saves notes and recalls them (MCP)", u: "ruby mcp", s: () => "6 tools", live: () => ["ruby_radar · ruby_clip", "ruby_remember · ruby_recall"] },
+  { k: "vault", ruby: 1, name: "Ruby Vault + Skills", d: "a ready folder of notes and templates, plus skills for Claude", u: "ruby init", s: () => "9 folders", live: () => ["Daily · Tokens · Radar", "Memory · Privacy · Seals"] },
+  { k: "privacy", ruby: 1, name: "Ruby Privacy", d: "lock your notes with a password; see what your wallet shows the world", u: "ruby lock · ruby footprint", s: () => "AES-256", live: () => ["notes encrypted on your machine", "footprint: links, hours, approvals"] },
+  { k: "seal", ruby: 1, name: "Ruby Seal", d: "prove a note existed, unchanged, at a block: its hash goes on chain", u: "ruby seal · ruby verify", s: () => "sha-256", live: () => ["0 ETH to yourself + hash", "simulated, you sign"] },
+];
+
+// ---------- data ----------
+async function blockLoop() { try { const b = await rpc("eth_getBlockByNumber", ["latest", false]); const n = parseInt(b.number, 16); if (n !== D.block) { D.block = n; D.txs = b.transactions.length; D.gas = parseInt(b.gasUsed, 16); D.blocks.push(D.gas); if (D.blocks.length > 40) D.blocks.shift(); } } catch {} paintStats(); }
+async function slow() {
+  try { const r = await rpc("eth_call", [{ to: USDG, data: "0x18160ddd" }, "latest"]); D.usdg = Number(BigInt(r)) / 1e6; } catch {}
+  try { const h = D.block || parseInt(await rpc("eth_blockNumber", []), 16); const l = await rpc("eth_getLogs", [{ address: PONS, topics: [T_LAUNCH], fromBlock: hex(h - 99_999), toBlock: hex(h) }]); D.launches = l.length; const old = await rpc("eth_getBlockByNumber", [hex(h - 99_999), false]), now = await rpc("eth_getBlockByNumber", [hex(h), false]); D.bt = (parseInt(now.timestamp, 16) - parseInt(old.timestamp, 16)) / 99_999; } catch {}
+  try { const j = await (await fetch(`https://aggregator-api.kyberswap.com/robinhood/api/v1/routes?tokenIn=${USDG}&tokenOut=${NVDA}&amountIn=100000000`, { headers: { "x-client-id": "ruby" } })).json(); if (j.code === 0) { D.quote = Number(BigInt(j.data.routeSummary.amountOut)) / 1e18; D.venues = [...new Set(j.data.routeSummary.route.flat().map((h) => h.exchange))]; } } catch {}
+  const sv = async (a) => { try { return (await (await fetch(`https://sourcify.dev/server/v2/contract/4663/${a}`)).json()).match || "not verified"; } catch { return null; } };
+  [D.verNVDA, D.verPons, D.verRam] = await Promise.all([sv(NVDA), sv(PONS), sv(RAMSES)]);
+  try { const h = D.block || parseInt(await rpc("eth_blockNumber", []), 16); const l = await rpc("eth_getLogs", [{ address: PONS, topics: [T_LAUNCH], fromBlock: hex(h - 40_000), toBlock: hex(h) }]); const last = l[l.length - 1];
+    if (last) { const tok = "0x" + last.topics[1].slice(26), sy = await rpc("eth_call", [{ to: tok, data: "0x95d89b41" }, "latest"]); let sym = "?"; try { const b = sy.slice(2), n = parseInt(b.slice(64, 128), 16); sym = decodeURIComponent(b.slice(128, 128 + n * 2).replace(/../g, "%$&")); } catch {}
+      D.latest = { sym, dev: (Number(BigInt("0x" + last.data.slice(66, 130))) / 1e18).toFixed(4).replace(/\.?0+$/, "") }; } } catch {}
+  try { const r = await rpc("eth_call", [{ to: USDG, data: "0x70a08231" + "000000000000000000000000000000000000000000000000000000000000dead".padStart(64, "0") }, "latest"]); D.deadUsdg = Number(BigInt(r)) / 1e6; } catch {}
+  paintStats(); buildPanels(); setNotes(); show(cur, true);
+}
+
+// ---------- top stats ----------
+function paintStats() { $("sB").textContent = D.block ? D.block.toLocaleString("en-US") : "…"; $("cB").textContent = D.block ? D.block.toLocaleString("en-US") : "…"; const p = $("pn-rpc"); if (p) paintPanel(0); }
+
+// ---------- panels (bottom grid) ----------
+function bars(rows) { const max = Math.max(...rows.map((r) => r[1]), 1); return rows.map(([l, v, t]) => `<div class="mbar"><span>${l}</span><i><u style="width:${(v / max) * 100}%"></u></i><em>${t}</em></div>`).join(""); }
+function panelHTML(i) {
+  const t = TOOLS[i], head = `<div class="ph"><b>${t.ruby ? "R" + (i - 7) : String(i + 1).padStart(2, "0")} · ${t.k.toUpperCase()}</b><span>${t.ruby ? "RUBY TOOL" : t.k === "rpc" ? "LIVE" : "READ"}</span></div>`;
+  if (t.k === "rpc") return head + `<div class="row">block<b>${D.block.toLocaleString("en-US")}</b></div><div class="row">time / block<b>${D.bt.toFixed(3)} s</b></div><svg class="spark" viewBox="0 0 200 40" preserveAspectRatio="none"><polyline fill="none" stroke="#ff2a55" stroke-width="1.5" points="${D.blocks.map((g, k) => `${(k / 39) * 200},${38 - (g / Math.max(...D.blocks, 1)) * 34}`).join(" ")}"/></svg>`;
+  if (t.k === "explorer") return head + `<div class="row">latest block<b><a href="${EXP}/block/${D.block}" target="_blank" rel="noopener">${D.block.toLocaleString("en-US")} ↗</a></b></div><div class="row">transactions<b>${D.txs}</b></div><div class="row">gas used<b>${D.gas.toLocaleString("en-US")}</b></div><div class="row">USDG<b><a href="${EXP}/token/${USDG}" target="_blank" rel="noopener">token page ↗</a></b></div>`;
+  if (t.k === "sourcify") return head + bars([["NVDA", D.verNVDA ? 1 : 0, D.verNVDA || "…"], ["Pons", D.verPons ? 1 : 0, D.verPons || "…"], ["Ramses", D.verRam ? 1 : 0, D.verRam || "…"]]);
+  if (t.k === "usdg") return head + `<div class="row">total supply<b>${D.usdg ? Math.round(D.usdg).toLocaleString("en-US") : "…"}</b></div><div class="row">decimals<b>6</b></div><div class="row">standard<b>EIP-3009</b></div><div class="row">address<b>${USDG.slice(0, 8)}…${USDG.slice(-4)}</b></div>`;
+  if (t.k === "stocks") return head + `<div class="row">NVDA (live)<b>${D.quote ? (100 / D.quote).toFixed(2) + " USDG" : "…"}</b></div>` + `<div class="row" style="flex-wrap:wrap;justify-content:flex-start;gap:4px 8px;color:var(--ink)">${STOCKS.join(" · ")}</div>`;
+  if (t.k === "router") return head + `<div class="row">100 USDG →<b>${D.quote ? D.quote.toFixed(5) + " NVDA" : "…"}</b></div>` + (D.venues.length ? bars(D.venues.slice(0, 3).map((v, k) => [v.slice(0, 9), 3 - k, "route"])) : "");
+  if (t.k === "launchpad") return head + `<div class="row">launches, last ~3 h<b>${D.launches ?? "…"}</b></div><div class="row">source<b>factory events</b></div><div class="row">factory<b>${D.verPons || "…"}</b></div>`;
+  if (t.ruby) { const L = t.live(); return head + `<div class="row">command<b>${t.u}</b></div>` + L.map((v) => `<div class="row" style="color:var(--ink)">${v}</div>`).join(""); }
+  return head + `<div class="row">factory<b>${RAMSES.slice(0, 8)}…${RAMSES.slice(-4)}</b></div><div class="row">Sourcify<b>${D.verRam || "…"}</b></div><div class="row">routed by<b>${D.venues.some((v) => /ramses/i.test(v)) ? "KyberSwap ✓" : "KyberSwap"}</b></div>`;
+}
+function paintPanel(i) { const el = $("pn-" + TOOLS[i].k); if (el) el.innerHTML = panelHTML(i); }
+function buildPanels() { $("panels").innerHTML = TOOLS.map((t, i) => `<div class="pn${t.ruby ? " rb" : ""}${i === cur ? " on" : ""}" id="pn-${t.k}" data-i="${i}"></div>`).join(""); TOOLS.forEach((_, i) => paintPanel(i)); $("panels").querySelectorAll(".pn").forEach((p) => p.onclick = () => { show(+p.dataset.i); restart(); });
+  $("rcards").innerHTML = TOOLS.filter((t) => t.ruby).map((t, i) => `<div class="cd rb"><span class="n">R${i + 1} / ${t.k.toUpperCase()} · RUBY TOOL</span><b>${t.name}</b><span>${t.d}</span><code>npx -y github:rubykit-star/ruby ${t.u.split(" · ")[0].replace("ruby ", "")}</code></div>`).join("");
+  $("cards").innerHTML = TOOLS.filter((t) => !t.ruby).map((t, i) => `<a class="cd" href="${t.k === "rpc" ? EXP : t.u.startsWith("0x") ? EXP + "/address/" + t.u : "https://" + t.u.split(" ")[0]}" target="_blank" rel="noopener"><span class="n">${String(i + 1).padStart(2, "0")} / ${t.k.toUpperCase()}</span><b>${t.name}</b><span>${t.d}</span><small>${t.u}</small></a>`).join(""); }
+
+// ---------- floating notes around the core ----------
+const NOTES = [];
+function setNotes() {
+  const box = $("notes"); box.innerHTML = ""; NOTES.length = 0;
+  const items = [
+    ["rpc.json", `{ "chainId": 4663,\n  "block": ${D.block} }`], ["usdg.md", `supply: ${D.usdg ? Math.round(D.usdg).toLocaleString("en-US") : "…"}\ndecimals: 6`], ["quote.json", `100 USDG →\n${D.quote ? D.quote.toFixed(5) : "…"} NVDA`],
+    ["sourcify", `NVDA: ${D.verNVDA || "…"}\nPons: ${D.verPons || "…"}`], ["launches.md", `last 3 h: ${D.launches ?? "…"}`], ["#4663", null], ["USDG", null], ["NVDA", null], ["#verified", null], ["blocks", "bars"], ["routes", "bars"], ["ramses.md", `factory: ${D.verRam || "…"}`], ["explorer", `latest block\n${D.txs} tx`], ["stocks.md", STOCKS.slice(0, 6).join(" ") + "\n" + STOCKS.slice(6).join(" ")], ["#launch", null], ["radar.md", D.latest ? `latest: ${D.latest.sym}\ndev buy: ${D.latest.dev} ETH` : "latest launch…"], ["clip.md", "verified: match\nowner: none"], ["daily.md", "total_usdg: …\ntransfers_24h"], ["memory/", "ruby_remember\nruby_recall"], ["vault/", "Daily/ Tokens/\nRadar/ Seals/"], ["privacy.md", "locked: AES-256\nfootprint: on"], ["seal.md", "sha256: e980a0…\nblock: sealed"], ["#sha256", null],
+  ];
+  items.forEach(([t, body], i) => { const el = document.createElement("div"); el.className = "note" + (body ? "" : " tag") + (i > 11 ? " far" : "") + (/^(radar|clip|daily|memory|vault|privacy|seal)/.test(t) || ["#ai", "#locked", "#sha256"].includes(t) ? " rb" : ""); el.innerHTML = body === "bars" ? `${t}<div class="bars"><i style="width:80px"></i><i style="width:56px"></i><i style="width:70px"></i></div>` : body ? `<span style="color:var(--ruby2)">${t}</span>\n${body}` : t; box.appendChild(el); NOTES.push({ el, a: (i / items.length) * Math.PI * 2 + Math.random() * 0.3, r: 0.36 + (i % 4) * 0.055 + Math.random() * 0.03, ph: Math.random() * 6.28, key: t }); });
+  placeNotes(0);
+}
+function placeNotes(t) { const st = $("stage").getBoundingClientRect(), W = st.width, H = st.height, cx = W / 2, cy = H / 2; NOTES.forEach((n) => { const a = n.a + t * 0.02, rx = W * n.r * 1.25, ry = H * n.r * 1.05; const x = cx + Math.cos(a) * rx + Math.sin(t * 0.6 + n.ph) * 6, y = cy + Math.sin(a) * ry + Math.cos(t * 0.5 + n.ph) * 5; n.el.style.left = Math.max(4, Math.min(W - n.el.offsetWidth - 4, x - n.el.offsetWidth / 2)) + "px"; n.el.style.top = Math.max(4, Math.min(H - n.el.offsetHeight - 4, y - n.el.offsetHeight / 2)) + "px"; n.x = x; n.y = y; }); }
+
+// ---------- the burst: spikes of light and rays out to the notes ----------
+const B = (() => { const cv = $("burst"), x = cv.getContext("2d"); let W, H, dpr, R0 = 0, cx = 0, cy = 0, last = 0;
+  const mob = innerWidth < 700, N = mob ? 900 : 2600, M = [], SPARKS = [], FLASH = [];
+  // a meteor flies a curved arc (quadratic bezier) from beyond the edge to a point on the ruby's rim
+  function spawn(m, fresh, from) { const a = Math.random() * Math.PI * 2, D = Math.hypot(W, H) * (0.5 + Math.random() * 0.4);
+    m.sx = from ? from.x : cx + Math.cos(a) * D; m.sy = from ? from.y : cy + Math.sin(a) * D;
+    const ia = Math.atan2(m.sy - cy, m.sx - cx) + (Math.random() - 0.5) * 2.2; m.ex = cx + Math.cos(ia) * R0; m.ey = cy + Math.sin(ia) * R0;
+    const mx = (m.sx + m.ex) / 2, my = (m.sy + m.ey) / 2, dx = m.ex - m.sx, dy = m.ey - m.sy, len = Math.hypot(dx, dy), bend = (Math.random() < 0.5 ? -1 : 1) * (0.18 + Math.random() * 0.45);
+    m.c1x = mx - (dy / len) * len * bend; m.c1y = my + (dx / len) * len * bend;
+    m.u = fresh ? Math.random() : 0; m.v = (from ? 0.012 : 0.003 + Math.pow(Math.random(), 2) * 0.012) * (700 / Math.max(300, len)); m.tl = from ? 0.28 : 0.06 + Math.random() * 0.22; m.w = Math.random(); m.hot = !!from; return m; }
+  const at = (m, u) => { const q = 1 - u; return [q * q * m.sx + 2 * q * u * m.c1x + u * u * m.ex, q * q * m.sy + 2 * q * u * m.c1y + u * u * m.ey]; };
+  function size() { const r = $("stage").getBoundingClientRect(); dpr = Math.min(devicePixelRatio || 1, 1.5); W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0); cx = W / 2; cy = H / 2; R0 = Math.min(W, H) * 0.19;
+    M.length = 0; for (let i = 0; i < N; i++) M.push(spawn({}, true)); }
+  addEventListener("resize", size); size();
+  function impact(px, py, hot) { FLASH.push({ x: px, y: py, t: 0, hot }); const n = hot ? 14 : (Math.random() < 0.2 ? 4 : 0); for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, sp = 1 + Math.random() * (hot ? 4 : 2.2); SPARKS.push({ x: px, y: py, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, l: 1 }); } }
+  function draw(t, focus) { const dt = Math.min(3, last ? (t - last) * 60 : 1); last = t; x.clearRect(0, 0, W, H);
+    const g = x.createRadialGradient(cx, cy, R0 * 0.8, cx, cy, R0 * 2.6); g.addColorStop(0, `rgba(${TH_.glow},.24)`); g.addColorStop(1, `rgba(${TH_.glow},0)`); x.fillStyle = g; x.beginPath(); x.arc(cx, cy, R0 * 2.6, 0, 7); x.fill();
+    if (Math.random() < 0.6 * dt) { const hot = NOTES.filter((n) => focus.includes(n.key)); if (hot.length) spawn(M[(Math.random() * N) | 0], false, hot[(Math.random() * hot.length) | 0]); }
+    x.globalCompositeOperation = "lighter"; x.lineCap = "round";
+    const NB = 4, tails = Array.from({ length: NB }, () => new Path2D()), hotTails = new Path2D(), heads = [], hotHeads = [];
+    for (const m of M) { m.u += m.v * (1 + m.u * 1.5) * dt; if (m.u >= 1) { impact(m.ex, m.ey, m.hot); spawn(m, false); continue; }
+      const u0 = Math.max(0, m.u - m.tl), P = m.hot ? hotTails : tails[Math.min(NB - 1, (m.w * NB) | 0)]; let [px, py] = at(m, u0); P.moveTo(px, py);
+      for (let k = 1; k <= 6; k++) { [px, py] = at(m, u0 + ((m.u - u0) * k) / 6); P.lineTo(px, py); }
+      if (m.hot) hotHeads.push(px, py); else if (m.w > 0.55) heads.push(px, py, m.w); }
+    for (let k = 0; k < NB; k++) { const w = (k + 0.5) / NB; x.strokeStyle = TH_.thr(w).replace(/,([0-9.]+)\)$/, (q, a) => "," + Math.min(1, a * 2.4).toFixed(3) + ")"); x.lineWidth = 1.2 + w * 2.6; x.stroke(tails[k]); }
+    x.strokeStyle = TH_.hot; x.lineWidth = 3.4; x.stroke(hotTails);
+    x.fillStyle = "rgba(255,240,215,.95)"; for (let i = 0; i < heads.length; i += 3) { const r = 1.4 + heads[i + 2] * 2; x.fillRect(heads[i] - r / 2, heads[i + 1] - r / 2, r, r); }
+    x.fillStyle = "#fff"; for (let i = 0; i < hotHeads.length; i += 2) { x.beginPath(); x.arc(hotHeads[i], hotHeads[i + 1], 3.4, 0, 7); x.fill(); }
+    for (let i = FLASH.length - 1; i >= 0; i--) { const f = FLASH[i]; f.t += 0.06 * dt; if (f.t > 1) { FLASH.splice(i, 1); continue; } const r = (f.hot ? 28 : 10) * f.t, gr = x.createRadialGradient(f.x, f.y, 0, f.x, f.y, r + 1); gr.addColorStop(0, `rgba(255,235,200,${(1 - f.t) * (f.hot ? 0.9 : 0.35)})`); gr.addColorStop(1, "rgba(255,235,200,0)"); x.fillStyle = gr; x.beginPath(); x.arc(f.x, f.y, r + 1, 0, 7); x.fill(); }
+    while (FLASH.length > 300) FLASH.shift();
+    x.fillStyle = TH_.hot; for (let i = SPARKS.length - 1; i >= 0; i--) { const p = SPARKS[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.95; p.vy *= 0.95; p.l -= 0.035 * dt; if (p.l <= 0) { SPARKS.splice(i, 1); continue; } x.globalAlpha = p.l; x.fillRect(p.x - 1, p.y - 1, 2, 2); } x.globalAlpha = 1;
+    x.globalCompositeOperation = "source-over"; }
+  return { draw, size }; })();
+
+// ---------- the gem inside the core ----------
+const GEM = (() => { const cv = $("gem"), x = cv.getContext("2d"); let W, H, dpr; function size() { const r = cv.getBoundingClientRect(); dpr = Math.min(devicePixelRatio || 1, 2); W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0); } addEventListener("resize", size); size();
+  const S = 8, V = []; for (let i = 0; i < S; i++) { const a = (i / S) * 6.283; V.push([Math.cos(a) * 0.55, -0.42, Math.sin(a) * 0.55]); } for (let i = 0; i < S; i++) { const a = ((i + 0.5) / S) * 6.283; V.push([Math.cos(a), -0.08, Math.sin(a)]); } V.push([0, 1.05, 0], [0, -0.42, 0]);
+  const F = []; for (let i = 0; i < S; i++) { const j = (i + 1) % S; F.push([17, i, j], [i, 8 + i, j], [j, 8 + i, 8 + j], [8 + i, 16, 8 + j]); }
+  const Lt = [-0.4, -0.8, -0.5].map((v, _, a) => v / Math.hypot(...a));
+  function draw(t) { x.clearRect(0, 0, W, H); const ay = t * 0.6, ax = -0.35, R = Math.min(W, H) * 0.42, cx = W / 2, cy = H / 2;
+    const P = V.map(([a, b, c]) => { let X = a * Math.cos(ay) + c * Math.sin(ay), Z = -a * Math.sin(ay) + c * Math.cos(ay); const Y = b * Math.cos(ax) - Z * Math.sin(ax); Z = b * Math.sin(ax) + Z * Math.cos(ax); return [X, Y, Z]; });
+    F.map((f) => { const [a, b, c] = f.map((i) => P[i]); const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]]; let n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]]; const l = Math.hypot(...n); n = n.map((q) => q / l); return { f, n, z: (a[2] + b[2] + c[2]) / 3 }; }).sort((p, q) => q.z - p.z)
+      .forEach(({ f, n }) => { const back = n[2] > 0, lit = Math.abs(n[0] * Lt[0] + n[1] * Lt[1] + n[2] * Lt[2]), sp = back ? 0 : Math.pow(lit, 9); x.globalAlpha = back ? 0.4 : 0.95;
+        x.fillStyle = `rgb(${Math.min(255, TH_.gem[0] + 135 * lit + 60 * sp)},${Math.min(255, TH_.gem[1] + 40 * lit + 170 * sp)},${Math.min(255, TH_.gem[2] + 60 * lit + 150 * sp)})`; x.strokeStyle = "rgba(255,200,215,.5)"; x.lineWidth = 0.7; x.beginPath(); f.forEach((i, k) => { const X = cx + P[i][0] * R, Y = cy + P[i][1] * R; k ? x.lineTo(X, Y) : x.moveTo(X, Y); }); x.closePath(); x.fill(); x.stroke(); });
+    x.globalAlpha = 1; }
+  return { draw }; })();
+
+// ---------- the spotlight cycle ----------
+const FOCUS = { rpc: ["rpc.json", "#4663", "blocks"], explorer: ["explorer", "gas", "blocks"], sourcify: ["sourcify", "#verified", "ramses.md"], usdg: ["usdg.md", "USDG", "0x5fc5…d168"], stocks: ["stocks.md", "NVDA", "TSLA", "SPY"], router: ["quote.json", "routes", "NVDA"], launchpad: ["launches.md", "#launch"], dex: ["ramses.md", "routes", "#verified"], radar: ["radar.md", "launches.md", "#launch"], clip: ["clip.md", "sourcify", "#verified"], daily: ["daily.md", "usdg.md"], memory: ["memory/", "#ai"], vault: ["vault/", "memory/", "daily.md"], privacy: ["privacy.md", "#locked"], seal: ["seal.md", "#sha256"] };
+let cur = 0, timer = null;
+function show(i, quiet) { cur = i; const t = TOOLS[i], sp = $("spot"); $("sN").textContent = `${i + 1}/${TOOLS.length}`; $("sNow").textContent = t.k; $("fC").textContent = `${String(i + 1).padStart(2, "0")} / ${TOOLS.length} · ${t.k}`;
+  $("prog").innerHTML = TOOLS.map((_, k) => `<i class="${k <= i ? "on" : ""}"></i>`).join(""); document.querySelectorAll(".pn").forEach((p, k) => p.classList.toggle("on", k === i));
+  NOTES.forEach((n) => n.el.classList.toggle("hot", FOCUS[t.k].includes(n.key)));
+  sp.classList.toggle("rb", !!t.ruby); const fill = () => { $("spN").textContent = `${t.ruby ? "R" + (i - 7) + " · RUBY TOOL" : String(i + 1).padStart(2, "0")} / ${t.k.toUpperCase()}`; $("spS").textContent = t.s(); $("spT").textContent = t.name; $("spD").textContent = t.d; $("spU").textContent = t.u; $("spL").innerHTML = t.live().map((v) => `<span>${v}</span>`).join("");
+    const st = $("stage").getBoundingClientRect(), W = st.width, H = st.height, spots = [[0.06, 0.08], [0.6, 0.1], [0.62, 0.62], [0.05, 0.6], [0.58, 0.36], [0.04, 0.34], [0.6, 0.06], [0.05, 0.12]];
+    const [fx, fy] = spots[i % spots.length], w = Math.min(380, W * 0.82); sp.style.left = (W < 700 ? (W - w) / 2 : Math.min(W - w - 8, fx * W)) + "px"; sp.style.top = (W < 700 ? (i % 2 ? H - 190 : 10) : Math.min(H - 170, fy * H)) + "px"; };
+  if (quiet) fill(); else { sp.classList.add("fade"); setTimeout(() => { fill(); sp.classList.remove("fade"); }, 300); } }
+function restart() { clearInterval(timer); timer = setInterval(() => show((cur + 1) % TOOLS.length), 2600); }
+
+// ---------- go ----------
+buildPanels(); setNotes(); show(0, true); restart();
+function show2() { show(cur, true); }
+blockLoop(); setInterval(blockLoop, 2000); slow(); setInterval(slow, 60000);
+setInterval(() => { TOOLS.forEach((_, i) => paintPanel(i)); }, 4000);
+let t0 = performance.now();
+function frame(now) { requestAnimationFrame(frame); if (document.hidden) return; const t = (now - t0) / 1000; placeNotes(t); B.draw(t, FOCUS[TOOLS[cur].k]); GEM.draw(t); }
+if (still) { placeNotes(0); B.draw(0, FOCUS.rpc); GEM.draw(0); } else requestAnimationFrame(frame);
+addEventListener("resize", () => { B.size(); placeNotes(0); show(cur, true); });
+
+// ---------- R7 Seal: hash in the browser, seal from the visitor's wallet after a mainnet simulation, verify any seal ----------
+(() => {
+  const PREFIX = "ruby-seal:", enc = new TextEncoder(), log = (c, m) => ($("slog").innerHTML += `<div class="${c}">${m}</div>`), clear = () => ($("slog").innerHTML = "");
+  let HASH = null;
+  const hexOf = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  async function setBytes(bytes, name) { HASH = hexOf(await crypto.subtle.digest("SHA-256", bytes)); $("shash").textContent = HASH; $("sgo").disabled = false; $("sver").disabled = !/^0x[0-9a-fA-F]{64}$/.test($("stx").value.trim()); if (name) $("sfname").textContent = name; }
+  $("sfile").onchange = async (e) => { const f = e.target.files[0]; if (!f) return; $("stext").value = ""; await setBytes(await f.arrayBuffer(), `${f.name} · ${f.size.toLocaleString("en-US")} bytes`); };
+  $("stext").oninput = async () => { const v = $("stext").value; if (!v) { HASH = null; $("shash").textContent = "–"; $("sgo").disabled = true; return; } await setBytes(enc.encode(v)); };
+  $("stx").oninput = () => { $("sver").disabled = !HASH || !/^0x[0-9a-fA-F]{64}$/.test($("stx").value.trim()); };
+  const dataHex = (h) => "0x" + [...enc.encode(PREFIX + h)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  $("sgo").onclick = async () => { clear(); const eth = window.ethereum; if (!eth) return log("no", "No wallet found in this browser. You can also run <code>ruby seal note.md</code> and send the data yourself.");
+    try { const [me] = await eth.request({ method: "eth_requestAccounts" }); try { await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x1237" }] }); } catch (e) { if (e.code === 4902) await eth.request({ method: "wallet_addEthereumChain", params: [{ chainId: "0x1237", chainName: "Robinhood Chain", rpcUrls: [RPC], nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 }, blockExplorerUrls: [EXP] }] }); else throw e; }
+      const call = { from: me, to: me, value: "0x0", data: dataHex(HASH) }; log("", `· simulating on Robinhood Chain mainnet as ${me.slice(0, 6)}…${me.slice(-4)}`);
+      const sim = await rpc("eth_simulateV1", [{ blockStateCalls: [{ calls: [call] }], validation: false }, "latest"]), c = sim?.[0]?.calls?.[0];
+      if (!c || c.status !== "0x1") return log("no", "✗ the simulation says it would fail. Nothing was signed.");
+      const gas = parseInt(c.gasUsed, 16), price = BigInt(await rpc("eth_gasPrice", [])), fee = Number(BigInt(Math.ceil(gas * 1.3)) * price) / 1e18;
+      log("ok", `✓ simulated: ${gas.toLocaleString("en-US")} gas, fee about ${fee.toFixed(8)} ETH`);
+      $("slog").insertAdjacentHTML("beforeend", `<div class="sact" id="sconf"><button type="button" id="syes">Sign the seal</button><button type="button" class="ghost" id="sno">Cancel</button></div>`);
+      $("sno").onclick = () => { $("sconf").remove(); log("", "· cancelled, nothing signed"); };
+      $("syes").onclick = async () => { $("sconf").remove(); try { log("", "· confirm in your wallet…"); const tx = await eth.request({ method: "eth_sendTransaction", params: [{ ...call, gas: "0x" + Math.ceil(gas * 1.3).toString(16) }] });
+        log("ok", `✓ sent <a href="${EXP}/tx/${tx}" target="_blank" rel="noopener">${tx.slice(0, 10)}…${tx.slice(-6)} ↗</a>`); $("stx").value = tx; $("sver").disabled = false;
+        for (let k = 0; k < 30; k++) { const rc = await rpc("eth_getTransactionReceipt", [tx]).catch(() => null); if (rc) { await verify(tx); return; } await new Promise((r) => setTimeout(r, 1500)); } log("", "· still waiting for the receipt; press Verify in a moment"); } catch (e) { log("no", "✗ " + (e.message || e)); } };
+    } catch (e) { log("no", "✗ " + (e.message || e)); } };
+  async function verify(tx) { const [t, rc] = await Promise.all([rpc("eth_getTransactionByHash", [tx]), rpc("eth_getTransactionReceipt", [tx])]); if (!t || !rc) return log("no", "✗ no such transaction on Robinhood Chain mainnet");
+    const raw = (t.input || "0x").slice(2), txt = (() => { try { return decodeURIComponent(raw.replace(/../g, "%$&")); } catch { return ""; } })(), b = await rpc("eth_getBlockByNumber", [rc.blockNumber, false]), at = new Date(parseInt(b.timestamp, 16) * 1000).toISOString().replace("T", " ").slice(0, 19);
+    if (rc.status === "0x1" && txt === PREFIX + HASH) log("ok", `✓ sealed. This note is unchanged since block ${parseInt(rc.blockNumber, 16).toLocaleString("en-US")} (${at} UTC), sealed by ${t.from.slice(0, 6)}…${t.from.slice(-4)}${t.from.toLowerCase() === (t.to || "").toLowerCase() ? " to itself" : ""}.`);
+    else log("no", `✗ not a match. On chain: ${txt.startsWith(PREFIX) ? txt.slice(0, 26) + "…" : raw ? "not a Ruby seal" : "no data"}. Change one character and the hash changes.`); }
+  $("sver").onclick = async () => { clear(); try { await verify($("stx").value.trim()); } catch (e) { log("no", "✗ " + (e.message || e)); } };
+})();
+</script>
+<script>
+window.RubyRadar = (() => {
+const G = { launch() {}, trade() {}, counts: () => ({ tok: 0, wal: 0 }) }; const tick = () => {}; const hud = () => {}; let ethMoved = 0n, tradesSeen = 0;
+function countTo(el, v) { if (el) el.textContent = (+v).toLocaleString("en-US"); }
+function openNode() {}
+const RPC = "https://rpc.mainnet.chain.robinhood.com", EXP = "https://robinhoodchain.blockscout.com";
+const FACTORY = "0xe33e9e479df8802cb0866d5d05258bec4cf62948", T_LAUNCH = "0xdcacba5e347ae7abd91cb519eb877af8fa7774e347b85dd3ddcd24a2ba8cdf37", T_BUY = "0xec36bf571f136799e8dc0b0b8bea4b04d8bd3d43de838aab0d5fc21d4cbfc455", T_SELL = "0x8113d738abdcb6b38357e9d53a54a7157861a09031b453651f0fe7fe151f59df", T_TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+const ZERO = "0x0000000000000000000000000000000000000000", DEAD = "0x000000000000000000000000000000000000dead", USDG = "0x5fc5360d0400a0fd4f2af552add042d716f1d168";
+const $ = (i) => document.getElementById(i);
+let rid = 0; const rpc = async (method, params) => { for (let k = 0; k < 5; k++) { try { const r = await fetch(RPC, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: ++rid, method, params }) }); if (r.status === 429 || r.status >= 500) throw new Error("busy"); const j = await r.json(); if (j.error) { if (/rate|many/i.test(j.error.message)) throw new Error(j.error.message); throw Object.assign(new Error(j.error.message), { final: 1 }); } return j.result; } catch (e) { if (e.final || k === 4) throw e; await new Promise((r) => setTimeout(r, 500 * (k + 1))); } } };
+const hex = (n) => "0x" + n.toString(16), ta = (t) => "0x" + t.slice(26), pad = (a) => "0x" + a.toLowerCase().replace(/^0x/, "").padStart(64, "0"), short = (a) => a.slice(0, 6) + "…" + a.slice(-4);
+const w = (d, i) => BigInt("0x" + d.slice(2 + i * 64, 66 + i * 64)), eth = (v, d = 4) => (Number(v) / 1e18).toFixed(d).replace(/\.?0+$/, "") || "0";
+const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;"), A = (u, l) => `<a href="${u}" target="_blank" rel="noopener">${esc(l)}</a>`;
+const fmtTok = (v, d = 18, m = 2) => { const s = BigInt(v).toString().padStart(d + 1, "0"), i = s.slice(0, -d) || "0", f = s.slice(-d).slice(0, m).replace(/0+$/, ""); return i.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (f ? "." + f : ""); };
+const str = (h) => { if (!h || h === "0x") return null; const b = h.slice(2); try { if (b.length === 64) return decodeURIComponent(b.replace(/(00)+$/, "").replace(/../g, "%$&")); const n = parseInt(b.slice(64, 128), 16); return decodeURIComponent(b.slice(128, 128 + n * 2).replace(/../g, "%$&")); } catch { return null; } };
+const ago = (d) => { const s = Math.max(0, (Date.now() - d) / 1000); return s < 60 ? Math.round(s) + "s" : s < 3600 ? Math.round(s / 60) + "m" : Math.round(s / 3600) + "h"; };
+// eth_getLogs over any range: the node caps some queries (often 100k blocks) and says so; split and retry
+async function getLogs(filter, from, to) { let step = to - from + 1; const out = [];
+  for (let f = from; f <= to; ) { const e = Math.min(to, f + step - 1);
+    try { out.push(...(await rpc("eth_getLogs", [{ ...filter, fromBlock: hex(f), toBlock: hex(e) }]))); f = e + 1; }
+    catch (err) { const m = /only (\d+) are allowed/.exec(err.message || ""); if (!m || step <= 1000) throw err; step = Math.max(1000, Math.min(step >> 1, +m[1])); } }
+  return out; }
+async function pool(items, n, fn) { const out = []; let i = 0; await Promise.all(Array.from({ length: n }, async () => { while (i < items.length) { const k = i++; try { out[k] = await fn(items[k]); } catch { out[k] = null; } } })); return out; }
+
+// ================= shared state: launches, trades, the graph =================
+const S = { head: 0, headTime: Date.now(), launches: new Map(), byCurve: new Map(), trades: [], meta: new Map(), seenTx: new Set() };
+const decodeLaunch = (l) => ({ token: ta(l.topics[1]), curve: ta(l.topics[2]), creator: ta(l.topics[3]), devEth: w(l.data, 1), devTokens: w(l.data, 2), block: parseInt(l.blockNumber, 16), tx: l.transactionHash });
+const decodeTrade = (l) => { const buy = l.topics[0] === T_BUY; return { curve: l.address.toLowerCase(), side: buy ? "buy" : "sell", trader: ta(l.topics[2]), eth: buy ? w(l.data, 0) : w(l.data, 1), tokens: buy ? w(l.data, 1) : w(l.data, 0), block: parseInt(l.blockNumber, 16), tx: l.transactionHash, li: l.logIndex }; };
+const blockTime = (b) => S.headTime - (S.head - b) * 105; // about 0.105 s per block, measured on chain
+async function meta(token) { if (S.meta.has(token)) return S.meta.get(token); const c = (d) => rpc("eth_call", [{ to: token, data: d }, "latest"]).catch(() => null);
+  const [n, s, t] = await Promise.all([c("0x06fdde03"), c("0x95d89b41"), c("0x18160ddd")]); const m = { name: str(n), symbol: str(s) || short(token), supply: t && t !== "0x" ? BigInt(t) : 10n ** 27n }; S.meta.set(token, m); return m; }
+
+// ================= loading and live updates =================
+async function boot() {
+  const hb = await rpc("eth_getBlockByNumber", ["latest", false]); S.head = parseInt(hb.number, 16); S.headTime = parseInt(hb.timestamp, 16) * 1000;
+  const L = []; for (let to = S.head; L.length < 30 && to > S.head - 3_000_000; to -= 200_000) { const l = await getLogs({ address: FACTORY, topics: [T_LAUNCH] }, Math.max(0, to - 199_999), to); L.push(...l.map(decodeLaunch).reverse()); }
+  const launches = L.slice(0, 30); launches.forEach((x) => { S.launches.set(x.token, x); S.byCurve.set(x.curve, x); });
+  await pool(launches, 5, (x) => meta(x.token)); launches.slice().reverse().forEach((x) => G.launch(x, S.meta.get(x.token), false));
+  const oldest = Math.min(...launches.map((x) => x.block)), curves = launches.map((x) => x.curve), tr = [];
+  for (let i = 0; i < curves.length; i += 15) tr.push(...(await getLogs({ address: curves.slice(i, i + 15), topics: [[T_BUY, T_SELL]] }, oldest, S.head)).map(decodeTrade));
+  tr.sort((a, b) => a.block - b.block); for (const t of tr) { S.trades.push(t); S.seenTx.add(t.tx + t.li); G.trade(t, false); tradesSeen++; ethMoved += t.eth; }
+  hud(); renderRadar(true); tick(`<span class="m">loaded ${launches.length} launches and ${tr.length.toLocaleString("en-US")} trades · watching live</span>`);
+  setInterval(live, 3000); setInterval(() => renderRadar(false), 15000);
+}
+let busy = false;
+async function live() {
+  if (busy || document.hidden) return; busy = true;
+  try {
+    const hb = await rpc("eth_getBlockByNumber", ["latest", false]), n = parseInt(hb.number, 16); if (n <= S.head) return; const from = S.head + 1; S.head = n; S.headTime = parseInt(hb.timestamp, 16) * 1000;
+    const nl = (await getLogs({ address: FACTORY, topics: [T_LAUNCH] }, from, n)).map(decodeLaunch);
+    for (const L of nl) { if (S.launches.has(L.token)) continue; S.launches.set(L.token, L); S.byCurve.set(L.curve, L); const m = await meta(L.token); G.launch(L, m, true); tick(`<span class="l">LAUNCH</span> ${esc(m.symbol)} <span class="m">by ${short(L.creator)} · dev buy ${eth(L.devEth)} ETH</span>`); }
+    const curves = [...S.byCurve.keys()]; const tr = [];
+    for (let i = 0; i < curves.length; i += 25) tr.push(...(await getLogs({ address: curves.slice(i, i + 25), topics: [[T_BUY, T_SELL]] }, from, n)).map(decodeTrade));
+    for (const t of tr) { if (S.seenTx.has(t.tx + t.li)) continue; S.seenTx.add(t.tx + t.li); S.trades.push(t); G.trade(t, true); tradesSeen++; ethMoved += t.eth; const L = S.byCurve.get(t.curve), m = S.meta.get(L.token);
+      tick(`<span class="${t.side === "buy" ? "b" : "s"}">${t.side.toUpperCase()}</span> ${eth(t.eth)} ETH · ${esc(m?.symbol || short(L.token))} <span class="m">${short(t.trader)}${t.trader === L.creator ? " (creator)" : ""}</span>`); }
+    hud();
+  } catch {} finally { busy = false; }
+}
+
+// ================= RADAR =================
+const RSTATE = new Map();
+async function renderRadar(first) {
+  const list = [...S.launches.values()].sort((a, b) => b.block - a.block).slice(0, 20);
+  const extra = await pool(list, 5, async (L) => { const [bal, curve] = await Promise.all([rpc("eth_call", [{ to: L.token, data: "0x70a08231" + pad(L.creator).slice(2) }, "latest"]).then((r) => (r && r !== "0x" ? BigInt(r) : 0n)), rpc("eth_getBalance", [L.curve, "latest"]).then(BigInt)]); return { bal, curve }; });
+  const box = $("rtable"); let sold = 0, traders = new Set();
+  list.forEach((L, i) => {
+    const m = S.meta.get(L.token) || { symbol: short(L.token), supply: 10n ** 27n }, ex = extra[i] || { bal: 0n, curve: 0n }, tr = S.trades.filter((t) => t.curve === L.curve), buys = tr.filter((t) => t.side === "buy").length, sells = tr.length - buys;
+    tr.forEach((t) => traders.add(t.trader)); const devSold = tr.filter((t) => t.side === "sell" && t.trader === L.creator).reduce((s, t) => s + t.tokens, 0n), pct = (v) => (Number((v * 100000n) / m.supply) / 1000);
+    const devNow = pct(ex.bal), devBuy = pct(L.devTokens), soldPct = pct(devSold); if (devSold > 0n) sold++;
+    const chips = []; if (devSold > 0n && devNow < 0.01) chips.push(`<span class="chip r">dev sold all</span>`); else if (devSold > 0n) chips.push(`<span class="chip r">dev sold ${soldPct.toFixed(2)}%</span>`); else if (devBuy > 0.01) chips.push(`<span class="chip g">dev holds</span>`);
+    if (devBuy >= 10) chips.push(`<span class="chip r">dev bought ${devBuy.toFixed(1)}%</span>`); if (tr.length === 0) chips.push(`<span class="chip n">no trades yet</span>`); if (new Set(tr.map((t) => t.trader)).size >= 25) chips.push(`<span class="chip n">${new Set(tr.map((t) => t.trader)).size} traders</span>`);
+    const sig = `${buys}/${sells}/${ex.bal}/${ex.curve}`; let row = box.querySelector(`[data-t="${L.token}"]`);
+    const html = `<span class="c1 muted">${ago(blockTime(L.block))} ago</span><span class="sym">${esc(m.symbol)}<small>${esc(m.name || L.token)}</small></span><span class="c3 muted">${short(L.creator)}</span><span class="c4">${eth(L.devEth)} ETH<br><span class="muted">${devBuy.toFixed(2)}%</span></span><span>${devNow.toFixed(2)}%<div class="bar"><i style="width:${Math.min(100, devBuy ? (devNow / devBuy) * 100 : 0)}%"></i></div></span><span class="c6 bs"><b>${buys}</b> / <i>${sells}</i></span><span class="c7">${eth(ex.curve, 3)}</span><span>${chips.join("")}</span>`;
+    if (!row) { row = document.createElement("div"); row.className = "rrow" + (first ? "" : " new"); row.dataset.t = L.token; row.onclick = () => openToken(L.token); }
+    else if (RSTATE.get(L.token) !== sig) { row.classList.remove("tick"); void row.offsetWidth; row.classList.add("tick"); }
+    row.innerHTML = html; RSTATE.set(L.token, sig); box.appendChild(row);
+  });
+  [...box.querySelectorAll(".rrow[data-t]")].forEach((r) => { if (!list.some((L) => L.token === r.dataset.t)) r.remove(); });
+  countTo($("rCount"), list.length); countTo($("rTr"), traders.size); countTo($("rSold"), sold);
+  const items = list.map((L) => { const m = S.meta.get(L.token) || { symbol: short(L.token) }; const n = S.trades.filter((t) => t.curve === L.curve).length; return `<span><i>◆</i> <b>${esc(m.symbol)}</b> · ${ago(blockTime(L.block))} ago · dev ${eth(L.devEth)} ETH · ${n} trades</span>`; }).join(""); if ($("strip")) $("strip").innerHTML = items + items;
+}
+
+// ================= notes in the drawer =================
+const tr2 = (c, th) => "<tr>" + c.map((v) => `<${th ? "th" : "td"}>${v}</${th ? "th" : "td"}>`).join("") + "</tr>";
+function openDrawer(file, html) { $("dfile").textContent = file; $("dbody").innerHTML = html; $("drawer").classList.add("on"); }
+$("dclose").onclick = () => $("drawer").classList.remove("on"); addEventListener("keydown", (e) => { if (e.key === "Escape") $("drawer").classList.remove("on"); });
+function openNode(n) { if (n.type === "token") openToken(n.id); else openWallet(n.id); }
+async function openToken(token) {
+  const L = S.launches.get(token), m = await meta(token), tr = S.trades.filter((t) => L && t.curve === L.curve), buys = tr.filter((t) => t.side === "buy"), sells = tr.filter((t) => t.side === "sell");
+  const vol = tr.reduce((s, t) => s + t.eth, 0n), traders = new Set(tr.map((t) => t.trader)), pct = (v) => ((Number((v * 100000n) / m.supply) / 1000).toFixed(2)) + "%";
+  const [bal, curve] = await Promise.all([rpc("eth_call", [{ to: token, data: "0x70a08231" + pad(L.creator).slice(2) }, "latest"]).then((r) => (r && r !== "0x" ? BigInt(r) : 0n)), rpc("eth_getBalance", [L.curve, "latest"]).then(BigInt)]);
+  const devSold = sells.filter((t) => t.trader === L.creator).reduce((s, t) => s + t.tokens, 0n);
+  const fm = `---\ntype: "launch"\nsymbol: ${JSON.stringify(m.symbol)}\nname: ${JSON.stringify(m.name || "")}\ntoken: "${token}"\ncreator: "${L.creator}"\ndev_buy_eth: ${eth(L.devEth)}\ndev_buy_pct: "${pct(L.devTokens)}"\ndev_now_pct: "${pct(bal)}"\nbuys: ${buys.length}\nsells: ${sells.length}\ntraders: ${traders.size}\nblock: ${S.head}\n---`;
+  const top = [...traders].map((a) => { const mine = tr.filter((t) => t.trader === a); return [a, mine.filter((t) => t.side === "buy").reduce((s, t) => s + t.eth, 0n), mine.filter((t) => t.side === "sell").reduce((s, t) => s + t.eth, 0n)]; }).sort((p, q) => (q[1] > p[1] ? 1 : -1)).slice(0, 8);
+  openDrawer(`Tokens/${m.symbol} ${token.slice(0, 6)}.md`, `<pre class="fm">${esc(fm)}</pre><h3>${esc(m.symbol)}${m.name && m.name !== m.symbol ? " · " + esc(m.name) : ""}</h3><p>Launched on the Pons launchpad at block ${L.block.toLocaleString("en-US")}, about ${ago(blockTime(L.block))} ago. Read from Robinhood Chain just now.</p>
+    <div>${devSold > 0n ? `<span class="flag r">creator sold ${pct(devSold)}</span>` : `<span class="flag g">creator has not sold on the curve</span>`}${tr.length ? `<span class="flag n">${traders.size} wallets traded</span>` : `<span class="flag n">no trades yet</span>`}</div>
+    <h4>Launch</h4><table>${tr2(["token", A(`${EXP}/token/${token}`, short(token))])}${tr2(["creator", A(`${EXP}/address/${L.creator}`, short(L.creator))])}${tr2(["dev buy", `${eth(L.devEth)} ETH · ${pct(L.devTokens)} of supply`])}${tr2(["creator holds now", pct(bal)])}${tr2(["launch tx", A(`${EXP}/tx/${L.tx}`, short(L.tx))])}</table>
+    <h4>Trading on the curve</h4><table>${tr2(["buys / sells", `${buys.length} / ${sells.length}`])}${tr2(["volume", eth(vol) + " ETH"])}${tr2(["ETH in curve now", eth(curve, 4)])}</table>
+    ${top.length ? `<h4>Biggest buyers</h4><table>${tr2(["wallet", "bought", "sold"], 1)}${top.map(([a, b, s]) => tr2([A(`${EXP}/address/${a}`, short(a)) + (a === L.creator ? " (creator)" : ""), eth(b) + " ETH", eth(s) + " ETH"])).join("")}</table>` : ""}
+    <div class="act"><button class="pri" id="fullclip">Full clip: holders, verification</button><button onclick="navigator.clipboard.writeText('${token}')">Copy address</button></div><div id="clipout"></div>`);
+  $("fullclip").onclick = () => fullClip(token);
+}
+function openWallet(a) {
+  const made = [...S.launches.values()].filter((L) => L.creator === a), mine = S.trades.filter((t) => t.trader === a), toks = new Map();
+  for (const t of mine) { const L = S.byCurve.get(t.curve); const k = L.token; const o = toks.get(k) || { b: 0n, s: 0n, n: 0 }; t.side === "buy" ? (o.b += t.eth) : (o.s += t.eth); o.n++; toks.set(k, o); }
+  const fm = `---\ntype: "wallet"\naddress: "${a}"\nlaunches_created: ${made.length}\ntrades_seen: ${mine.length}\nblock: ${S.head}\n---`;
+  openDrawer(`Wallets/${short(a)}.md`, `<pre class="fm">${esc(fm)}</pre><h3>${short(a)}</h3><p>${A(`${EXP}/address/${a}`, a)}</p>
+    ${made.length ? `<h4>Launched</h4><table>${made.map((L) => tr2([esc(S.meta.get(L.token)?.symbol || short(L.token)), `dev buy ${eth(L.devEth)} ETH`, `${ago(blockTime(L.block))} ago`])).join("")}</table>` : ""}
+    <h4>Trades seen by Ruby</h4>${toks.size ? `<table>${tr2(["token", "bought", "sold", "trades"], 1)}${[...toks].map(([k, o]) => tr2([esc(S.meta.get(k)?.symbol || short(k)), eth(o.b) + " ETH", eth(o.s) + " ETH", o.n])).join("")}</table>` : "<p>None on the tokens shown.</p>"}
+    <p>Only trades on the launches in the graph are counted.</p>`);
+}
+async function fullClip(token) {
+  const out = $("clipout"), say = (m) => (out.innerHTML += `<p>✓ ${esc(m)}</p>`); out.innerHTML = "<h4>Full clip</h4>"; $("fullclip").disabled = true;
+  try {
+    const head = S.head, logs = []; const L = S.launches.get(token), from = L ? L.block : 0;
+    logs.push(...(await getLogs({ address: token, topics: [T_TRANSFER] }, from, head)));
+    const m = await meta(token), bal = new Map(); for (const l of logs) { const v = BigInt(l.data), a = ta(l.topics[1]), b = ta(l.topics[2]); bal.set(a, (bal.get(a) || 0n) - v); bal.set(b, (bal.get(b) || 0n) + v); } bal.delete(ZERO);
+    const hs = [...bal].filter(([, v]) => v > 0n).sort((a, b) => (b[1] > a[1] ? 1 : -1)); say(`${hs.length} holders from ${logs.length} transfers`);
+    let ver = "unknown"; try { ver = (await (await fetch(`https://sourcify.dev/server/v2/contract/4663/${token}`)).json()).match || "not verified"; } catch {} say(`source on Sourcify: ${ver}`);
+    const burned = (bal.get(DEAD) || 0n), pct = (v) => ((Number((v * 100000n) / m.supply) / 1000).toFixed(2)) + "%";
+    out.innerHTML += `<table>${tr2(["holder", "share", ""], 1)}${hs.slice(0, 10).map(([a, v]) => tr2([A(`${EXP}/address/${a}`, short(a)), pct(v), a === L?.curve ? "bonding curve" : a === L?.creator ? "creator" : a === DEAD ? "burned" : ""])).join("")}</table><p>burned: ${pct(burned)} · total supply ${fmtTok(m.supply)}</p>`;
+  } catch (e) { out.innerHTML += `<p>Could not finish: ${esc(e.message)}</p>`; }
+}
+
+let started = false; return { start() { if (started) return; started = true; boot().catch((e) => { const r = $("rtable"); if (r) r.insertAdjacentHTML("beforeend", `<div class="rrow"><span>could not read the chain right now: ${esc(e.message)}</span></div>`); }); } };
+})();
+</script>
+<script>
+(() => {
+  const T = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef", Z = "0x0000000000000000000000000000000000000000", DEAD = "0x000000000000000000000000000000000000dead", USDG = "0x5fc5360d0400a0fd4f2af552add042d716f1d168";
+  const pad = (a) => "0x" + a.toLowerCase().replace(/^0x/, "").padStart(64, "0"), ta = (t) => "0x" + t.slice(26), short = (a) => a.slice(0, 6) + "…" + a.slice(-4), $ = (i) => document.getElementById(i);
+  const fmt = (v, d, m = 2) => { const s = BigInt(v).toString().padStart(d + 1, "0"), i = s.slice(0, -d) || "0", f = s.slice(-d).slice(0, m).replace(/0+$/, ""); return i.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (f ? "." + f : ""); };
+  const str = (h) => { if (!h || h === "0x") return null; const b = h.slice(2); try { if (b.length === 64) return decodeURIComponent(b.replace(/(00)+$/, "").replace(/../g, "%$&")); const n = parseInt(b.slice(64, 128), 16); return decodeURIComponent(b.slice(128, 128 + n * 2).replace(/../g, "%$&")); } catch { return null; } };
+  const call = (to, data) => rpc("eth_call", [{ to, data }, "latest"]).catch(() => null), bal = async (t, w) => { const r = await call(t, "0x70a08231" + pad(w).slice(2)); return r && r !== "0x" ? BigInt(r) : 0n; };
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;"), A = (u, l) => `<a href="${u}" target="_blank" rel="noopener">${esc(l)}</a>`, tr = (cells, th) => "<tr>" + cells.map((c) => `<${th ? "th" : "td"}>${c}</${th ? "th" : "td"}>`).join("") + "</tr>";
+  const say = (cls, m) => { $("log").innerHTML += `<div class="${cls}">${esc(m)}</div>`; };
+  const CH = [["NVDA", "0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec"], ["TSLA", "0x322f0929c4625ed5bad873c95208d54e1c003b2d"], ["USDG", USDG], ["SPY", "0x117cc2133c37b721f49de2a7a74833232b3b4c0c"]];
+  CH.forEach(([n, a]) => { const b = document.createElement("button"); b.type = "button"; b.textContent = n; b.onclick = () => { $("ca").value = a; run(); }; $("chips").appendChild(b); });
+  let busy = false;
+  async function run() {
+    const token = $("ca").value.trim().toLowerCase(); if (busy) return; $("log").innerHTML = "";
+    if (!/^0x[0-9a-f]{40}$/.test(token)) return say("no", "Paste a 0x… contract address (42 characters).");
+    busy = true; $("go").textContent = "Reading…";
+    try {
+      const code = await rpc("eth_getCode", [token, "latest"]); if (!code || code === "0x") throw new Error("No contract code at this address on Robinhood Chain mainnet.");
+      const [nm, sy, de, su, ow] = await Promise.all([call(token, "0x06fdde03"), call(token, "0x95d89b41"), call(token, "0x313ce567"), call(token, "0x18160ddd"), call(token, "0x8da5cb5b")]);
+      if (!de || de === "0x" || !su || su === "0x") throw new Error("This contract does not answer like an ERC-20 token.");
+      const dec = Number(BigInt(de)), sup = BigInt(su), sym = str(sy) || short(token), name = str(nm), owner = ow && ow.length >= 66 ? ta(ow.slice(0, 66)) : null; say("ok", `${sym}: ${name || "no name"} · ${dec} decimals`);
+      const head = parseInt(await rpc("eth_blockNumber", []), 16);
+      let mint = null; for (let f = 0; f <= head && !mint; f += 9000000) { const l = await rpc("eth_getLogs", [{ address: token, topics: [T, pad(Z)], fromBlock: "0x" + f.toString(16), toBlock: "0x" + Math.min(head, f + 8999999).toString(16) }]); if (l.length) mint = l[0]; }
+      let first = null; if (mint) { const [tx, bl] = await Promise.all([rpc("eth_getTransactionByHash", [mint.transactionHash]), rpc("eth_getBlockByNumber", [mint.blockNumber, false])]); first = { block: parseInt(mint.blockNumber, 16), tx: mint.transactionHash, at: new Date(parseInt(bl.timestamp, 16) * 1000), sender: tx.from.toLowerCase(), via: (tx.to || "").toLowerCase(), to: ta(mint.topics[2]), amt: BigInt(mint.data) }; say("ok", `first mint found at block ${first.block.toLocaleString("en-US")}`); }
+      let holders = null, n = 0;
+      if (first) { const all = []; for (let f = first.block; f <= head; f += 9000000) { const l = await rpc("eth_getLogs", [{ address: token, topics: [T], fromBlock: "0x" + f.toString(16), toBlock: "0x" + Math.min(head, f + 8999999).toString(16) }]).catch(() => null); if (!l) { all.length = 0; n = -1; break; } all.push(...l); if (all.length > 30000) break; }
+        n = n < 0 ? -1 : all.length; if (n > 0 && n <= 30000) { const m = new Map(); for (const l of all) { const v = BigInt(l.data), a = ta(l.topics[1]), b = ta(l.topics[2]); m.set(a, (m.get(a) || 0n) - v); m.set(b, (m.get(b) || 0n) + v); } m.delete(Z); holders = [...m].filter(([, v]) => v > 0n).sort((a, b) => (b[1] > a[1] ? 1 : -1)); say("ok", `${holders.length.toLocaleString("en-US")} holders from ${n.toLocaleString("en-US")} transfers`); } else say("ok", "too many transfers to rebuild holders in a browser"); }
+      const [dead, zero] = await Promise.all([bal(token, DEAD), bal(token, Z)]);
+      let ver = "unknown"; try { const j = await (await fetch(`https://sourcify.dev/server/v2/contract/4663/${token}`)).json(); ver = j.match || "not verified"; } catch {} say("ok", `Sourcify: ${ver}`);
+      let px = null; if (token !== USDG) try { const j = await (await fetch(`https://aggregator-api.kyberswap.com/robinhood/api/v1/routes?tokenIn=${USDG}&tokenOut=${token}&amountIn=1000000000`, { headers: { "x-client-id": "ruby" } })).json(); if (j.code === 0) { const out = Number(BigInt(j.data.routeSummary.amountOut)) / 10 ** dec; if (out > 0) px = 1000 / out; } } catch {}
+      const burned = dead + zero, pct = (v) => ((Number(v) / Number(sup)) * 100).toFixed(2) + "%";
+      const top = []; for (const [a, v] of (holders || []).slice(0, 8)) { const tags = []; if (a === DEAD) tags.push("dead address"); if (first && a === first.to) tags.push("first mint recipient"); if (a !== DEAD) { const c = await rpc("eth_getCode", [a, "latest"]).catch(() => "0x"); if (c && c !== "0x") tags.push("contract"); } if (a === owner) tags.push("owner()"); top.push(tr([A(`${EXP}/address/${a}`, short(a)), fmt(v, dec), pct(v), tags.join(", ")])); }
+      const fm = [["type", '"token"'], ["symbol", JSON.stringify(sym)], ["name", JSON.stringify(name || "")], ["address", JSON.stringify(token)], ["decimals", dec], ["total_supply", JSON.stringify(fmt(sup, dec))], ["burned_pct", JSON.stringify(pct(burned))], ["holders", holders ? holders.length : ""], ["verified", JSON.stringify(ver)], ["first_block", first ? first.block : ""], ["price_usdg", px ? +px.toPrecision(6) : ""], ["block", head]];
+      $("nfm").textContent = "---\n" + fm.map(([k, v]) => `${k}: ${v}`).join("\n") + "\n---";
+      const ownerLine = owner === null ? "no owner() function" : owner === Z ? "renounced (owner() is 0x0)" : A(`${EXP}/address/${owner}`, short(owner));
+      $("nmd").innerHTML = `<h3>${esc(sym)}${name && name !== sym ? " · " + esc(name) : ""}</h3><p>Facts read from Robinhood Chain mainnet at block ${head.toLocaleString("en-US")}, in your browser just now.</p>
+        <h4>Contract</h4><table>${tr(["address", A(`${EXP}/token/${token}`, token)])}${tr(["source verified (Sourcify)", esc(ver)])}${tr(["owner", ownerLine])}${tr(["total supply", fmt(sup, dec)])}</table>
+        <h4>Birth</h4>${first ? `<table>${tr(["first mint", `${fmt(first.amt, dec)} to ${A(`${EXP}/address/${first.to}`, short(first.to))}`])}${tr(["block · time", `${first.block.toLocaleString("en-US")} · ${first.at.toISOString().replace("T", " ").slice(0, 16)} UTC`])}${tr(["transaction", A(`${EXP}/tx/${first.tx}`, short(first.tx))])}${tr(["sent by", A(`${EXP}/address/${first.sender}`, short(first.sender))])}${tr(["through contract", first.via ? A(`${EXP}/address/${first.via}`, short(first.via)) + (first.via === token ? " (the token itself)" : " (a factory or launchpad)") : "–"])}</table>` : "<p>No mint event found.</p>"}
+        <h4>Supply</h4><table>${tr(["", "amount", "share"], 1)}${tr(["burned (dead + 0x0)", fmt(burned, dec), pct(burned)])}${tr(["not burned", fmt(sup - burned, dec), pct(sup - burned)])}</table>
+        <h4>Holders</h4>${holders ? `<p>${holders.length.toLocaleString("en-US")} addresses hold it, from ${n.toLocaleString("en-US")} transfers.</p><table>${tr(["address", "balance", "share", "label"], 1)}${top.join("")}</table>` : `<p>Not rebuilt here. See the ${A(`${EXP}/token/${token}?tab=holders`, "explorer")}.</p>`}
+        <h4>Price</h4><p>${px ? `About <b>${px.toPrecision(6)} USDG</b> per token, from a live KyberSwap quote of 1,000 USDG.` : token === USDG ? "USDG is the unit of account." : "No DEX route on KyberSwap right now."}</p>`;
+      $("nfile").textContent = `Tokens/${sym} ${token.slice(0, 6)}.md`; $("ncap").innerHTML = "Written in your browser from Robinhood Chain just now. <code>ruby clip</code> saves the same note to your vault.";
+      say("ok", "note written");
+    } catch (e) { say("no", e.message); } finally { busy = false; $("go").textContent = "Clip ▸"; }
+  }
+  $("go").onclick = run; $("ca").addEventListener("keydown", (e) => { if (e.key === "Enter") run(); });
+})();
+
+// ---------- Daily, read only: balances and their value for any address ----------
+(() => {
+  const MK = { USDG: [USDG, 6], BTC: ["0xcec185eb182c47d1ba1efc84e6959e18cd620be4", 8], NVDA: ["0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec", 18], TSLA: ["0x322f0929c4625ed5bad873c95208d54e1c003b2d", 18], AAPL: ["0xaf3d76f1834a1d425780943c99ea8a608f8a93f9", 18], AMZN: ["0x12f190a9f9d7d37a250758b26824b97ce941bf54", 18], GOOGL: ["0x2e0847e8910a9732eb3fb1bb4b70a580adad4fe3", 18], META: ["0xc0d6457c16cc70d6790dd43521c899c87ce02f35", 18], MSFT: ["0xe93237c50d904957cf27e7b1133b510c669c2e74", 18], SPY: ["0x117cc2133c37b721f49de2a7a74833232b3b4c0c", 18], QQQ: ["0xd5f3879160bc7c32ebb4dc785f8a4f505888de68", 18], GLD: ["0xc9a981fee1f9dec688bb123ccdecc63d0debfc4e", 18], COIN: ["0x6330d8c3178a418788df01a47479c0ce7ccf450b", 18], MSTR: ["0xec262a75e413fafd0df80480274532c79d42da09", 18] };
+  const ETHA = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", log = (c, m) => ($("dlog").innerHTML += `<div class="${c}">${m}</div>`);
+  const fmtA = (v, d) => { const n = Number(v) / 10 ** d; return n === 0 ? "0" : n < 0.0001 ? n.toExponential(2) : n.toLocaleString("en-US", { maximumFractionDigits: 6 }); };
+  async function price(addr, dec) { try { const j = await (await fetch(`https://aggregator-api.kyberswap.com/robinhood/api/v1/routes?tokenIn=${USDG}&tokenOut=${addr}&amountIn=1000000000`, { headers: { "x-client-id": "ruby" } })).json(); if (j.code !== 0) return null; const out = Number(BigInt(j.data.routeSummary.amountOut)) / 10 ** dec; return out > 0 ? 1000 / out : null; } catch { return null; } }
+  async function run() { const w = $("dw").value.trim().toLowerCase(); $("dlog").innerHTML = ""; if (!/^0x[0-9a-f]{40}$/.test(w)) return log("no", "Paste a 0x… wallet address (42 characters).");
+    $("dgo").textContent = "Reading…"; try { const pad = "000000000000000000000000" + w.slice(2), eth = BigInt(await rpc("eth_getBalance", [w, "latest"])), head = parseInt(await rpc("eth_blockNumber", []), 16); log("ok", `block ${head.toLocaleString("en-US")}`);
+      const rows = []; let total = 0; const ep = await price(ETHA, 18); const ev = ep ? (Number(eth) / 1e18) * ep : null; if (ev) total += ev; rows.push(["ETH", fmtA(eth, 18), ep ? ep.toFixed(2) : "–", ev != null ? ev.toFixed(2) : "–"]);
+      for (const [s, [a, d]] of Object.entries(MK)) { const r = await rpc("eth_call", [{ to: a, data: "0x70a08231" + pad }, "latest"]).catch(() => "0x"); const b = r && r !== "0x" ? BigInt(r) : 0n; if (b === 0n) continue; const p = s === "USDG" ? 1 : await price(a, d), v = p != null ? (Number(b) / 10 ** d) * p : null; if (v != null) total += v; rows.push([s, fmtA(b, d), p != null ? (s === "USDG" ? "1.00" : p.toPrecision(6)) : "–", v != null ? v.toFixed(2) : "–"]); }
+      log("ok", `${rows.length} holdings priced from live quotes`); const day = new Date().toISOString().slice(0, 10); $("dfile2").textContent = `Daily/${day} ${w.slice(0, 6)}….md`;
+      $("dmd").innerHTML = `<h3>${day} · ${w.slice(0, 6)}…${w.slice(-4)}</h3><p>Read from Robinhood Chain mainnet at block ${head.toLocaleString("en-US")}, in your browser just now.</p><h4>Value</h4><p><b>${total.toFixed(2)} USDG</b> in priced holdings.</p><h4>Holdings</h4><table><tr><th>token</th><th>balance</th><th>price (USDG)</th><th>value</th></tr>${rows.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join("")}</tr>`).join("")}</table><p>Prices are live KyberSwap quotes of 1,000 USDG. <code>ruby daily</code> also lists the last 24 hours of transfers and the change since your previous note.</p>`;
+    } catch (e) { log("no", "✗ " + (e.message || e)); } finally { $("dgo").textContent = "Read ▸"; } }
+  $("dgo").onclick = run; $("dw").addEventListener("keydown", (e) => { if (e.key === "Enter") run(); }); $("dex").onclick = () => { $("dw").value = "0x000000000000000000000000000000000000dEaD"; run(); };
+})();
+// ---------- Memory: an example session, typed out ----------
+(() => { const S2 = [["u", "you", "Anything new on the launchpad worth a look?"], ["c", "tool", "ruby_radar { count: 10 }"], ["r", "result", "wrote Radar/… · 10 launches"], ["a", "claude", "Two stand out on facts alone: one creator bought 18.6% at launch and sold all of it; another has 46 wallets trading and the creator still holds its 1%."], ["u", "you", "Clip the second one and remember to check it tomorrow."], ["c", "tool", "ruby_clip { address: \"0x…\" }"], ["r", "result", "wrote Tokens/… · 46 holders · not verified on Sourcify"], ["c", "tool", "ruby_remember { title: \"Check tomorrow\" }"], ["r", "result", "saved Memory/… Check tomorrow.md"], ["a", "claude", "Done. Ask me tomorrow what I remembered."]];
+  const box = $("chat"); S2.forEach(([c, who, t]) => { const d = document.createElement("div"); d.className = "msg " + c; d.innerHTML = `<div class="who">${who.toUpperCase()}</div><div class="t">${t.replace(/</g, "&lt;")}</div>`; box.appendChild(d); });
+  let shown = 0, running = false; const step = () => { const ms = box.querySelectorAll(".msg"); if (shown >= ms.length) { setTimeout(() => { ms.forEach((m) => m.classList.remove("on")); shown = 0; step(); }, 7000); return; } ms[shown++].classList.add("on"); setTimeout(step, 1100); };
+  window.RubyMemory = { start() { if (running) return; running = true; still ? box.querySelectorAll(".msg").forEach((m) => m.classList.add("on")) : step(); } }; })();
+// ---------- background meteors on the inner pages ----------
+const BGM = (() => { const cv = $("bgm"), x = cv.getContext("2d"); let W, H, dpr; const M = [];
+  function sp(m, f) { const a = Math.random() * 6.283, D = Math.hypot(W, H) * 0.6; m.sx = W * 0.85 + Math.cos(a) * D; m.sy = H * 0.15 + Math.sin(a) * D; m.ex = W * 0.85; m.ey = H * 0.15; const mx = (m.sx + m.ex) / 2, my = (m.sy + m.ey) / 2, dx = m.ex - m.sx, dy = m.ey - m.sy, b = (Math.random() < 0.5 ? -1 : 1) * (0.2 + Math.random() * 0.4); m.cx = mx - dy * b; m.cy = my + dx * b; m.u = f ? Math.random() : 0; m.v = 0.002 + Math.random() * 0.006; m.tl = 0.05 + Math.random() * 0.15; m.w = Math.random(); return m; }
+  function size() { dpr = Math.min(devicePixelRatio || 1, 1.5); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0); M.length = 0; for (let i = 0; i < (W < 700 ? 260 : 700); i++) M.push(sp({}, true)); }
+  addEventListener("resize", size); size();
+  const at = (m, u) => { const q = 1 - u; return [q * q * m.sx + 2 * q * u * m.cx + u * u * m.ex, q * q * m.sy + 2 * q * u * m.cy + u * u * m.ey]; };
+  let on = false; function frame() { if (!on) return; requestAnimationFrame(frame); if (document.hidden) return; x.clearRect(0, 0, W, H); x.globalCompositeOperation = "lighter"; x.lineCap = "round"; const P = [new Path2D(), new Path2D()];
+    for (const m of M) { m.u += m.v * (1 + m.u); if (m.u >= 1) { sp(m); continue; } const u0 = Math.max(0, m.u - m.tl), p = P[m.w > 0.6 ? 1 : 0]; let [a, b] = at(m, u0); p.moveTo(a, b); for (let k = 1; k <= 5; k++) { [a, b] = at(m, u0 + ((m.u - u0) * k) / 5); p.lineTo(a, b); } }
+    x.strokeStyle = TH_.thr(0.3); x.lineWidth = 1.2; x.stroke(P[0]); x.strokeStyle = TH_.thr(0.9); x.lineWidth = 2.2; x.stroke(P[1]); x.globalCompositeOperation = "source-over"; }
+  return { on() { if (!on) { on = true; size(); frame(); } }, off() { on = false; x.clearRect(0, 0, W, H); } }; })();
+// ---------- router: clean paths, one view per menu (404.html sends deep links back as ?p=) ----------
+(() => { const VIEWS = ["home", "chain", "radar", "clip", "daily", "memory", "privacy", "seal", "start"];
+  const route = () => { const seg = location.pathname.replace(/\/+$/, "").split("/").pop().replace(/\.html$/, ""); return VIEWS.includes(seg) ? seg : "home"; };
+  const q = new URLSearchParams(location.search).get("p"); if (q) history.replaceState(null, "", q);
+  function show() { const id = route(); document.querySelectorAll(".view").forEach((v) => v.classList.toggle("on", v.id === id)); document.querySelectorAll(".site nav a").forEach((a) => a.classList.toggle("on", a.getAttribute("href") === (id === "home" ? "/" : "/" + id)));
+    scrollTo(0, 0); if (id === "home") { BGM.off(); B.size(); placeNotes(0); show2(); } else BGM.on(); if (id === "radar") window.RubyRadar.start(); if (id === "memory") window.RubyMemory.start(); document.title = id === "home" ? "Ruby · Chain Kit" : "Ruby · " + id[0].toUpperCase() + id.slice(1); }
+  document.addEventListener("click", (e) => { const a = e.target.closest("a[href]"); if (!a || e.metaKey || e.ctrlKey || a.target === "_blank") return; const h = a.getAttribute("href"); if (!h.startsWith("/") || h.startsWith("//")) return; const seg = h === "/" ? "home" : h.slice(1); if (!VIEWS.includes(seg)) return; e.preventDefault(); if (h !== location.pathname) history.pushState(null, "", h); show(); });
+  addEventListener("popstate", show); show(); })();
+
+</script>
+</body>
+</html>
