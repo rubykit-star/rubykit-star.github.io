@@ -127,10 +127,13 @@ a{color:inherit}
 .pt{width:100%;border-collapse:collapse;margin-top:12px;font-size:11.5px}.pt th{text-align:left;color:var(--dim);font-weight:700;letter-spacing:.08em;border-bottom:1px solid var(--line);padding:7px 10px 7px 0}.pt td{border-bottom:1px solid var(--line);padding:8px 10px 8px 0;color:var(--mute);overflow-wrap:anywhere;vertical-align:top}.pt td:first-child{color:var(--ink);white-space:nowrap}
 .pnav{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.pnav a{font-size:11px;color:var(--mute);border:1px solid var(--line);border-radius:2px;padding:5px 10px;text-decoration:none}.pnav a:hover{color:#1a1205;background:#e8be6e;border-color:#e8be6e}
 .box b a,.note2 a{color:var(--cream)}
+.site .soc{display:flex;gap:4px;margin-left:6px}.site .soc a{display:grid;place-items:center;width:32px;height:32px;color:var(--mute);border:1px solid var(--line);border-radius:3px}.site .soc a:hover{color:#1a1205;background:#e8be6e;border-color:#e8be6e}
+.cw{flex:none;font:700 11.5px "JetBrains Mono",monospace;background:#e8be6e;color:#1a1205;border:0;border-radius:3px;padding:9px 12px;cursor:pointer;white-space:nowrap}.cw.on{background:transparent;color:var(--cream);border:1px solid rgba(232,190,110,.5)}.cw.on::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#7ee2a8;margin-right:7px;vertical-align:1px}
+@media (max-width:1100px){.site .soc{display:none}}@media (max-width:640px){.site .in{gap:8px}.cw{padding:8px 9px;font-size:10.5px}}
 </style>
 </head>
 <body>
-<header class="site"><div class="in"><a class="lg" href="/"><svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><path d="M9 6h14l6 7-13 16L3 13Z" fill="#d61f45"/><path d="M3 13h26l-6-7H9Z" fill="#e8be6e"/></svg>RUBY</a><nav aria-label="Main"><a href="/">Home</a><a href="/chain">Chain</a><a href="/radar">Radar</a><a href="/clip">Clip</a><a href="/daily">Daily</a><a href="/memory">Memory</a><a href="/privacy">Privacy</a><a href="/seal">Seal</a><a href="/protocol">Protocol</a><a href="/start">Start</a></nav></div></header>
+<header class="site"><div class="in"><a class="lg" href="/"><svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><path d="M9 6h14l6 7-13 16L3 13Z" fill="#d61f45"/><path d="M3 13h26l-6-7H9Z" fill="#e8be6e"/></svg>RUBY</a><nav aria-label="Main"><a href="/">Home</a><a href="/chain">Chain</a><a href="/radar">Radar</a><a href="/clip">Clip</a><a href="/daily">Daily</a><a href="/memory">Memory</a><a href="/privacy">Privacy</a><a href="/seal">Seal</a><a href="/protocol">Protocol</a><a href="/start">Start</a></nav><span class="soc"><a href="https://x.com/rubykit_cc" target="_blank" rel="noopener" aria-label="Ruby on X"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M17.75 3h3.07l-6.7 7.66L22 21h-6.17l-4.83-6.32L5.47 21H2.4l7.17-8.2L2 3h6.33l4.37 5.77L17.75 3zm-1.08 16.17h1.7L7.4 4.74H5.58l11.09 14.43z"/></svg></a><a href="https://github.com/rubykit-star" target="_blank" rel="noopener" aria-label="Ruby on GitHub"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg></a></span><button type="button" class="cw" id="cw">Connect wallet</button></div></header>
 <canvas id="bgm" aria-hidden="true"></canvas>
 <main>
 <section class="view" id="home"><div class="kit" style="position:relative;z-index:1">
@@ -163,7 +166,7 @@ a{color:inherit}
 <div class="box"><b>In your terminal</b><div class="code">npx -y github:rubykit-star/ruby clip 0x…token</div><p class="note2" style="margin-top:10px">Writes Tokens/&lt;symbol&gt; &lt;address&gt;.md in your vault. Facts with links, never a score.</p></div></div>
 <div class="paper"><div class="nb"><span id="nfile">Tokens/… .md</span></div><pre class="fm" id="nfm">paste an address or pick a token</pre><div class="md" id="nmd"><p>The note appears here, written from Robinhood Chain in your browser.</p></div><div style="padding:0 14px 12px;font:500 11px 'JetBrains Mono',monospace;color:#9a8264" id="ncap"></div></div></div></div></section>
 <section class="view" id="daily"><div class="page"><div class="ph2"><div class="ey">R3 · DAILY</div><h1>Your wallet, <em>written down.</em></h1><p>A note a day per wallet. Try it with any address: the balances and their value are read live, nothing is connected or signed.</p></div><div class="grid2" style="margin-top:22px;align-items:start">
-<div><div class="box gold"><b>Paste a wallet address</b> <span class="note2">read only, no wallet connection</span><div class="inp"><input id="dw" placeholder="0x… wallet address" spellcheck="false" autocomplete="off"><button class="btn" id="dgo" type="button">Read ▸</button></div><div class="mini"><button type="button" id="dex">example: the burn address</button></div><div class="lg2" id="dlog"></div></div>
+<div><div class="box gold"><b>Paste a wallet address</b> <span class="note2">read only, no wallet connection</span><div class="inp"><input id="dw" placeholder="0x… wallet address" spellcheck="false" autocomplete="off"><button class="btn" id="dgo" type="button">Read ▸</button></div><div class="mini"><button type="button" id="dmine">my connected wallet</button><button type="button" id="dex">example: the burn address</button></div><div class="lg2" id="dlog"></div></div>
 <div class="box"><b>Every day, in your terminal</b><div class="code">npx -y github:rubykit-star/ruby daily 0x…wallet --label main</div><p class="note2" style="margin-top:10px">Writes Daily/&lt;date&gt; &lt;label&gt;.md with balances, value in USDG, the last 24 hours of token transfers, and the change since your previous note. Put your wallets in ruby.json and run it each morning.</p></div></div>
 <div class="paper"><div class="nb"><span id="dfile2">Daily/… .md</span></div><div class="md" id="dmd"><p>Holdings and value appear here, read live from Robinhood Chain.</p></div></div></div></div></section>
 <section class="view" id="memory"><div class="page"><div class="ph2"><div class="ey">R4 · MEMORY</div><h1>An AI that <em>remembers the chain.</em></h1><p>Run ruby mcp and your agent gets six tools: it reads Robinhood Chain, writes what it finds as Markdown notes in your vault, and recalls them next time.</p></div><div class="grid2" style="margin-top:22px;align-items:start"><div>
@@ -190,7 +193,7 @@ npx -y github:rubykit-star/ruby footprint 0x… --days 90</div></div></div>
         <div class="srow">sha-256 <b id="shash">–</b></div>
       </div>
       <div>
-        <div class="sact"><button type="button" id="sgo" disabled>Seal from my wallet</button><span class="hint">0 ETH to yourself, data = ruby-seal:hash · simulated on mainnet first</span></div>
+        <div class="sact"><button type="button" id="sgo" disabled>Seal from my wallet</button><span class="hint"><span id="swho">connect a wallet to seal</span> · 0 ETH to yourself, data = ruby-seal:hash · simulated on mainnet first</span></div>
         <div class="sact"><input id="stx" placeholder="0x… seal transaction to check" spellcheck="false"><button type="button" id="sver" disabled>Verify</button></div>
         <div class="slog" id="slog" aria-live="polite"></div>
       </div>
@@ -242,7 +245,7 @@ ruby seal &lt;note&gt;              the hash and data to seal a note on chain
 ruby verify &lt;note&gt; &lt;tx&gt;       check a seal</div></div>
 <div class="box"><b>Skills for Claude</b><p class="note2">Copy ruby-daily, ruby-check-token and ruby-weekly from skills/ into your Claude skills folder, then ask "write my daily note" or paste a token address.</p></div></div></section>
 </main>
-<footer style="position:relative;z-index:1;border-top:1px solid var(--line);padding:22px 18px 34px;font-size:11px;color:var(--dim);text-align:center">rubykit.cc · Robinhood Chain mainnet · read only except Seal · not affiliated with the tools it reads · MIT</footer>
+<footer style="position:relative;z-index:1;border-top:1px solid var(--line);padding:22px 18px 34px;font-size:11px;color:var(--dim);text-align:center">rubykit.cc · <a href="https://x.com/rubykit_cc" target="_blank" rel="noopener">X @rubykit_cc</a> · <a href="https://github.com/rubykit-star" target="_blank" rel="noopener">GitHub</a> · Robinhood Chain mainnet · read only except Seal · not affiliated with the tools it reads · MIT</footer>
 <aside class="drawer" id="drawer" aria-live="polite"><div class="dbar"><span id="dfile">note.md</span><button type="button" id="dclose">Close ✕</button></div><div class="dbody" id="dbody"></div></aside>
 <script>
 
@@ -414,7 +417,7 @@ addEventListener("resize", () => { B.size(); placeNotes(0); show(cur, true); });
   $("stx").oninput = () => { $("sver").disabled = !HASH || !/^0x[0-9a-fA-F]{64}$/.test($("stx").value.trim()); };
   const dataHex = (h) => "0x" + [...enc.encode(PREFIX + h)].map((b) => b.toString(16).padStart(2, "0")).join("");
   $("sgo").onclick = async () => { clear(); const eth = window.ethereum; if (!eth) return log("no", "No wallet found in this browser. You can also run <code>ruby seal note.md</code> and send the data yourself.");
-    try { const [me] = await eth.request({ method: "eth_requestAccounts" }); try { await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x1237" }] }); } catch (e) { if (e.code === 4902) await eth.request({ method: "wallet_addEthereumChain", params: [{ chainId: "0x1237", chainName: "Robinhood Chain", rpcUrls: [RPC], nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 }, blockExplorerUrls: [EXP] }] }); else throw e; }
+    try { const me = window.RubyWallet.get() || (await window.RubyWallet.connect()); if (!me) return;
       const call = { from: me, to: me, value: "0x0", data: dataHex(HASH) }; log("", `· simulating on Robinhood Chain mainnet as ${me.slice(0, 6)}…${me.slice(-4)}`);
       const sim = await rpc("eth_simulateV1", [{ blockStateCalls: [{ calls: [call] }], validation: false }, "latest"]), c = sim?.[0]?.calls?.[0];
       if (!c || c.status !== "0x1") return log("no", "✗ the simulation says it would fail. Nothing was signed.");
@@ -621,7 +624,8 @@ let started = false; return { start() { if (started) return; started = true; boo
       log("ok", `${rows.length} holdings priced from live quotes`); const day = new Date().toISOString().slice(0, 10); $("dfile2").textContent = `Daily/${day} ${w.slice(0, 6)}….md`;
       $("dmd").innerHTML = `<h3>${day} · ${w.slice(0, 6)}…${w.slice(-4)}</h3><p>Read from Robinhood Chain mainnet at block ${head.toLocaleString("en-US")}, in your browser just now.</p><h4>Value</h4><p><b>${total.toFixed(2)} USDG</b> in priced holdings.</p><h4>Holdings</h4><table><tr><th>token</th><th>balance</th><th>price (USDG)</th><th>value</th></tr>${rows.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join("")}</tr>`).join("")}</table><p>Prices are live KyberSwap quotes of 1,000 USDG. <code>ruby daily</code> also lists the last 24 hours of transfers and the change since your previous note.</p>`;
     } catch (e) { log("no", "✗ " + (e.message || e)); } finally { $("dgo").textContent = "Read ▸"; } }
-  $("dgo").onclick = run; $("dw").addEventListener("keydown", (e) => { if (e.key === "Enter") run(); }); $("dex").onclick = () => { $("dw").value = "0x000000000000000000000000000000000000dEaD"; run(); };
+  $("dgo").onclick = run; $("dw").addEventListener("keydown", (e) => { if (e.key === "Enter") run(); }); $("dmine").onclick = async () => { const me = window.RubyWallet.get() || (await window.RubyWallet.connect().catch(() => null)); if (me) { $("dw").value = me; run(); } };
+  $("dex").onclick = () => { $("dw").value = "0x000000000000000000000000000000000000dEaD"; run(); };
 })();
 // ---------- Memory: an example session, typed out ----------
 (() => { const S2 = [["u", "you", "Anything new on the launchpad worth a look?"], ["c", "tool", "ruby_radar { count: 10 }"], ["r", "result", "wrote Radar/… · 10 launches"], ["a", "claude", "Two stand out on facts alone: one creator bought 18.6% at launch and sold all of it; another has 46 wallets trading and the creator still holds its 1%."], ["u", "you", "Clip the second one and remember to check it tomorrow."], ["c", "tool", "ruby_clip { address: \"0x…\" }"], ["r", "result", "wrote Tokens/… · 46 holders · not verified on Sourcify"], ["c", "tool", "ruby_remember { title: \"Check tomorrow\" }"], ["r", "result", "saved Memory/… Check tomorrow.md"], ["a", "claude", "Done. Ask me tomorrow what I remembered."]];
@@ -647,6 +651,17 @@ const BGM = (() => { const cv = $("bgm"), x = cv.getContext("2d"); let W, H, dpr
   document.addEventListener("click", (e) => { const a = e.target.closest("a[href]"); if (!a || e.metaKey || e.ctrlKey || a.target === "_blank") return; const h = a.getAttribute("href"); if (!h.startsWith("/") || h.startsWith("//")) return; const seg = h === "/" ? "home" : h.slice(1); if (!VIEWS.includes(seg)) return; e.preventDefault(); if (h !== location.pathname) history.pushState(null, "", h); show(); });
   addEventListener("popstate", show); show(); })();
 
+
+// ---------- wallet: connect once, used by Seal (to sign) and Daily (to read your own wallet). Read only otherwise ----------
+window.RubyWallet = (() => { let me = null; const btn = $("cw"), sh = (a) => a.slice(0, 6) + "…" + a.slice(-4);
+  function paint() { btn.classList.toggle("on", !!me); btn.textContent = me ? sh(me) : "Connect wallet"; btn.title = me ? me + " · Robinhood Chain · click to disconnect" : "Connect a wallet (read only; Seal asks before signing)"; const dw = $("dw"); if (dw && me && !dw.value) dw.value = me; const sg = $("swho"); if (sg) sg.textContent = me ? "sealing from " + sh(me) : "connect a wallet to seal"; }
+  async function connect() { const eth = window.ethereum; if (!eth) { alert("No wallet found in this browser. Install a wallet extension (OKX, MetaMask, Rabby) to connect."); return null; }
+    const [a] = await eth.request({ method: "eth_requestAccounts" });
+    try { await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x1237" }] }); } catch (e) { if (e.code === 4902) await eth.request({ method: "wallet_addEthereumChain", params: [{ chainId: "0x1237", chainName: "Robinhood Chain", rpcUrls: [RPC], nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 }, blockExplorerUrls: [EXP] }] }); else throw e; }
+    me = a.toLowerCase(); paint(); return me; }
+  btn.onclick = async () => { if (me) { me = null; paint(); return; } try { await connect(); } catch (e) { btn.textContent = "Connect wallet"; } };
+  if (window.ethereum) { window.ethereum.request({ method: "eth_accounts" }).then((a) => { if (a && a[0]) { me = a[0].toLowerCase(); paint(); } }).catch(() => {}); window.ethereum.on?.("accountsChanged", (a) => { me = a && a[0] ? a[0].toLowerCase() : null; paint(); }); }
+  paint(); return { get: () => me, connect }; })();
 </script>
 </body>
 </html>
