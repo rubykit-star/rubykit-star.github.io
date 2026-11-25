@@ -67,7 +67,7 @@ a{color:inherit}
 .cd .n{font-size:10px;letter-spacing:.16em;color:var(--dim)}.cd b{font-size:15px}.cd span{color:var(--mute)}.cd small{color:var(--dim);overflow-wrap:anywhere}
 .note2{margin-top:22px;color:var(--dim);font-size:11px}
 @media (max-width:1200px){.panels{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media (max-width:1000px){.top{grid-template-columns:1fr 1fr 1fr}.top .st:nth-child(n+5){display:none}.panels,.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.stage{min-height:520px}}
+@media (max-width:1000px){.prog i{width:12px}.top{grid-template-columns:1fr 1fr 1fr}.top .st:nth-child(n+5){display:none}.panels,.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.stage{min-height:520px}}
 @media (max-width:560px){.top{gap:12px}.top .st:nth-child(2){display:none}.brand small{display:none}.panels,.cards{grid-template-columns:minmax(0,1fr)}.note.far{display:none}.stage{min-height:480px}.top{grid-template-columns:1fr 1fr}.top .st:nth-child(n+4){display:none}}
 @media (prefers-reduced-motion:reduce){.core .ring2{animation:none}}
 .sealbox{margin-top:26px;border:1px solid rgba(232,190,110,.4);border-radius:3px;background:linear-gradient(160deg,rgba(40,28,12,.7),var(--panel))}
@@ -135,13 +135,17 @@ a{color:inherit}
 .wfeed{margin-top:22px;min-height:520px;display:flex;flex-direction:column}.wfh{display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);padding-bottom:10px}.wfh span{flex:1}.mini2{font:700 11px "JetBrains Mono",monospace;background:transparent;color:var(--cream);border:1px solid var(--line);border-radius:2px;padding:5px 9px;cursor:pointer}
 #wfeed{flex:1;overflow:auto;max-height:640px}.wev{display:grid;grid-template-columns:70px 18px minmax(0,1fr);gap:8px;padding:9px 2px;border-bottom:1px solid rgba(232,190,110,.08);font-size:12px;animation:win .5s}.wev time{color:var(--dim)}.wev i{font-style:normal;text-align:center}.wev .t{color:var(--mute);overflow-wrap:anywhere}.wev .t b{color:var(--ink);font-weight:500}.wev .t a{color:var(--dim)}
 .wev.hot{background:linear-gradient(90deg,rgba(214,31,69,.18),transparent)}.wev.hot i{color:var(--ruby)}.wev.hot .t{color:var(--ink)}.wev.warn i{color:#e8be6e}.wev.info i{color:var(--dim)}@keyframes win{from{opacity:0;transform:translateY(-6px)}}
+.tokbar{position:relative;z-index:2;max-width:1500px;margin:12px auto 0;padding:9px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;border:1px solid rgba(232,190,110,.45);border-radius:3px;background:linear-gradient(90deg,rgba(40,28,12,.85),rgba(14,10,6,.85));font-size:11.5px;width:calc(100% - 36px)}
+.tk-l{font-weight:800;letter-spacing:.16em;color:#e8be6e}.tk-s{font-weight:700;font-size:10px;letter-spacing:.14em;border:1px solid var(--line);border-radius:2px;padding:2px 7px;color:var(--mute)}.tk-s.live{color:#1a1205;background:#7ee2a8;border-color:#7ee2a8}
+.tk-ca{flex:1;min-width:0;color:var(--mute);overflow-wrap:anywhere}.tk-ca a{color:var(--cream)}.tk-ca code{color:var(--ink);font-size:12px}.tk-b{display:flex;gap:6px}.tk-b button,.tk-b a{font:700 11px "JetBrains Mono",monospace;background:transparent;color:var(--cream);border:1px solid var(--line);border-radius:2px;padding:5px 9px;cursor:pointer;text-decoration:none}.tk-b button{background:#e8be6e;color:#1a1205;border-color:#e8be6e}
+@media (max-width:560px){.foot{flex-wrap:wrap}.foot .prog{display:none}.kit{grid-template-columns:minmax(0,1fr)}.top{grid-template-columns:minmax(0,1fr) auto!important}.top .st:nth-child(n+4){display:none}.brand{font-size:16px}}
 </style>
 </head>
 <body>
 <header class="site"><div class="in"><a class="lg" href="/"><svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><path d="M9 6h14l6 7-13 16L3 13Z" fill="#d61f45"/><path d="M3 13h26l-6-7H9Z" fill="#e8be6e"/></svg>RUBY</a><nav aria-label="Main"><a href="/">Home</a><a href="/chain">Chain</a><a href="/radar">Radar</a><a href="/clip">Clip</a><a href="/daily">Daily</a><a href="/memory">Memory</a><a href="/watch">Watch</a><a href="/privacy">Privacy</a><a href="/seal">Seal</a><a href="/protocol">Protocol</a><a href="/start">Start</a></nav><span class="soc"><a href="https://x.com/rubykit_cc" target="_blank" rel="noopener" aria-label="Ruby on X"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M17.75 3h3.07l-6.7 7.66L22 21h-6.17l-4.83-6.32L5.47 21H2.4l7.17-8.2L2 3h6.33l4.37 5.77L17.75 3zm-1.08 16.17h1.7L7.4 4.74H5.58l11.09 14.43z"/></svg></a><a href="https://github.com/rubykit-star" target="_blank" rel="noopener" aria-label="Ruby on GitHub"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg></a></span><button type="button" class="cw" id="cw">Connect wallet</button></div></header>
 <canvas id="bgm" aria-hidden="true"></canvas>
 <main>
-<section class="view" id="home"><div class="kit" style="position:relative;z-index:1">
+<section class="view" id="home"><div class="tokbar" id="tokbar"><span class="tk-l">RUBY TOKEN · ROBINHOOD CHAIN</span><span class="tk-s" id="tkState">NOT LAUNCHED</span><span class="tk-ca" id="tkCa">The contract address will be posted here and on <a href="https://x.com/rubykit_cc" target="_blank" rel="noopener">@rubykit_cc</a> at launch. Trust no other source.</span><span class="tk-b"><button type="button" id="tkCopy" hidden>Copy CA</button><a id="tkExp" target="_blank" rel="noopener" hidden>Explorer ↗</a><a id="tkLp" target="_blank" rel="noopener" hidden>Buy page ↗</a></span></div><div class="kit" style="position:relative;z-index:1">
   <div class="top">
     <div class="brand">RUBY <span>/ CHAIN KIT</span><small>ROBINHOOD CHAIN · 8 CHAIN TOOLS + 7 RUBY TOOLS · LIVE</small></div>
     <div class="st"><small>TOOLS</small><b id="sN">1/15</b></div>
@@ -740,6 +744,15 @@ window.RubyWatch = (() => {
   if (/\/watch\/?$/.test(location.pathname)) setTimeout(() => api.start(), 0);
   return api;
 })();
+
+// ---------- token card: shows the contract address once config.json has it, checked on chain ----------
+(() => { fetch("/config.json?t=" + Date.now(), { cache: "no-store" }).then((r) => r.json()).then(async (c) => {
+  const t = (c.token || "").trim().toLowerCase(); if (!/^0x[0-9a-f]{40}$/.test(t)) return;
+  let sym = c.symbol || "", ok = false; try { const [code, sy, de] = await Promise.all([rpc("eth_getCode", [t, "latest"]), rpc("eth_call", [{ to: t, data: "0x95d89b41" }, "latest"]), rpc("eth_call", [{ to: t, data: "0x313ce567" }, "latest"])]);
+    ok = code && code !== "0x" && de && de !== "0x"; try { const b = sy.slice(2), n = parseInt(b.slice(64, 128), 16); sym = decodeURIComponent(b.slice(128, 128 + n * 2).replace(/../g, "%$&")) || sym; } catch {} } catch {}
+  if (!ok) return; const st = $("tkState"); st.textContent = "LIVE"; st.classList.add("live"); $("tokbar").querySelector(".tk-l").textContent = (sym ? "$" + sym : "RUBY TOKEN") + " · ROBINHOOD CHAIN";
+  $("tkCa").innerHTML = `CA <code>${t}</code>`; const cp = $("tkCopy"); cp.hidden = false; cp.onclick = async () => { try { await navigator.clipboard.writeText(t); cp.textContent = "Copied"; } catch { cp.textContent = t; } setTimeout(() => (cp.textContent = "Copy CA"), 1500); };
+  const ex = $("tkExp"); ex.href = `${EXP}/token/${t}`; ex.hidden = false; if (/^https:\/\//.test(c.tokenUrl || "")) { const lp = $("tkLp"); lp.href = c.tokenUrl; lp.hidden = false; } }).catch(() => {}); })();
 </script>
 </body>
 </html>
