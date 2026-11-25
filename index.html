@@ -382,7 +382,7 @@ const GEM = (() => { const cv = $("gem"), x = cv.getContext("2d"); let W, H, dpr
       .forEach(({ f, n }) => { const back = n[2] > 0, lit = Math.abs(n[0] * Lt[0] + n[1] * Lt[1] + n[2] * Lt[2]), sp = back ? 0 : Math.pow(lit, 9); x.globalAlpha = back ? 0.4 : 0.95;
         x.fillStyle = `rgb(${Math.min(255, TH_.gem[0] + 135 * lit + 60 * sp)},${Math.min(255, TH_.gem[1] + 40 * lit + 170 * sp)},${Math.min(255, TH_.gem[2] + 60 * lit + 150 * sp)})`; x.strokeStyle = "rgba(255,200,215,.5)"; x.lineWidth = 0.7; x.beginPath(); f.forEach((i, k) => { const X = cx + P[i][0] * R, Y = cy + P[i][1] * R; k ? x.lineTo(X, Y) : x.moveTo(X, Y); }); x.closePath(); x.fill(); x.stroke(); });
     x.globalAlpha = 1; }
-  return { draw }; })();
+  return { draw, size }; })();
 
 // ---------- the spotlight cycle ----------
 const FOCUS = { rpc: ["rpc.json", "#4663", "blocks"], explorer: ["explorer", "gas", "blocks"], sourcify: ["sourcify", "#verified", "ramses.md"], usdg: ["usdg.md", "USDG", "0x5fc5…d168"], stocks: ["stocks.md", "NVDA", "TSLA", "SPY"], router: ["quote.json", "routes", "NVDA"], launchpad: ["launches.md", "#launch"], dex: ["ramses.md", "routes", "#verified"], radar: ["radar.md", "launches.md", "#launch"], clip: ["clip.md", "sourcify", "#verified"], daily: ["daily.md", "usdg.md"], memory: ["memory/", "#ai"], vault: ["vault/", "memory/", "daily.md"], privacy: ["privacy.md", "#locked"], seal: ["seal.md", "#sha256"] };
@@ -647,7 +647,7 @@ const BGM = (() => { const cv = $("bgm"), x = cv.getContext("2d"); let W, H, dpr
   const route = () => { const seg = location.pathname.replace(/\/+$/, "").split("/").pop().replace(/\.html$/, ""); return VIEWS.includes(seg) ? seg : "home"; };
   const q = new URLSearchParams(location.search).get("p"); if (q) history.replaceState(null, "", q);
   function show() { const id = route(); document.querySelectorAll(".view").forEach((v) => v.classList.toggle("on", v.id === id)); document.querySelectorAll(".site nav a").forEach((a) => a.classList.toggle("on", a.getAttribute("href") === (id === "home" ? "/" : "/" + id)));
-    scrollTo(0, 0); if (id === "home") { BGM.off(); B.size(); placeNotes(0); show2(); } else BGM.on(); if (id === "radar") window.RubyRadar.start(); if (id === "memory") window.RubyMemory.start(); document.title = id === "home" ? "Ruby · Chain Kit" : "Ruby · " + id[0].toUpperCase() + id.slice(1); }
+    scrollTo(0, 0); if (id === "home") { BGM.off(); B.size(); GEM.size(); placeNotes(0); show2(); } else BGM.on(); if (id === "radar") window.RubyRadar.start(); if (id === "memory") window.RubyMemory.start(); document.title = id === "home" ? "Ruby · Chain Kit" : "Ruby · " + id[0].toUpperCase() + id.slice(1); }
   document.addEventListener("click", (e) => { const a = e.target.closest("a[href]"); if (!a || e.metaKey || e.ctrlKey || a.target === "_blank") return; const h = a.getAttribute("href"); if (!h.startsWith("/") || h.startsWith("//")) return; const seg = h === "/" ? "home" : h.slice(1); if (!VIEWS.includes(seg)) return; e.preventDefault(); if (h !== location.pathname) history.pushState(null, "", h); show(); });
   addEventListener("popstate", show); show(); })();
 
