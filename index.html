@@ -138,6 +138,7 @@ a{color:inherit}
 .tokbar{position:relative;z-index:2;max-width:1500px;margin:12px auto 0;padding:9px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;border:1px solid rgba(232,190,110,.45);border-radius:3px;background:linear-gradient(90deg,rgba(40,28,12,.85),rgba(14,10,6,.85));font-size:11.5px;width:calc(100% - 36px)}
 .tk-l{font-weight:800;letter-spacing:.16em;color:#e8be6e}.tk-s{font-weight:700;font-size:10px;letter-spacing:.14em;border:1px solid var(--line);border-radius:2px;padding:2px 7px;color:var(--mute)}.tk-s.live{color:#1a1205;background:#7ee2a8;border-color:#7ee2a8}
 .tk-ca{flex:1;min-width:0;color:var(--mute);overflow-wrap:anywhere}.tk-ca a{color:var(--cream)}.tk-ca code{color:var(--ink);font-size:12px}.tk-b{display:flex;gap:6px}.tk-b button,.tk-b a{font:700 11px "JetBrains Mono",monospace;background:transparent;color:var(--cream);border:1px solid var(--line);border-radius:2px;padding:5px 9px;cursor:pointer;text-decoration:none}.tk-b button{background:#e8be6e;color:#1a1205;border-color:#e8be6e}
+@media (max-width:760px){.tk-ca{flex:1 1 100%;font-size:11px}.tk-ca code{font-size:11px;word-break:break-all}.tk-b{flex-wrap:wrap}}
 @media (max-width:560px){.foot{flex-wrap:wrap}.foot .prog{display:none}.kit{grid-template-columns:minmax(0,1fr)}.top{grid-template-columns:minmax(0,1fr) auto!important}.top .st:nth-child(n+4){display:none}.brand{font-size:16px}}
 .xstat{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:22px}.xstat div{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:12px 14px;font-size:10px;letter-spacing:.12em;color:var(--dim)}.xstat b{display:block;font-size:24px;letter-spacing:-.02em;color:var(--ink);margin-bottom:4px}
 .xf{display:flex;gap:4px}.xf button{font:700 10.5px "JetBrains Mono",monospace;background:transparent;color:var(--mute);border:1px solid var(--line);border-radius:2px;padding:4px 8px;cursor:pointer}.xf button.on{background:#e8be6e;color:#1a1205;border-color:#e8be6e}
@@ -755,14 +756,17 @@ window.RubyWatch = (() => {
   return api;
 })();
 
-// ---------- token card: shows the contract address once config.json has it, checked on chain ----------
-(() => { fetch("/config.json?t=" + Date.now(), { cache: "no-store" }).then((r) => r.json()).then(async (c) => {
+// ---------- token card: shows the contract address from config.json at once; LIVE only after it is checked on chain ----------
+(() => { fetch("/config.json?t=" + Date.now(), { cache: "no-store" }).then((r) => r.json()).then((c) => {
   const t = (c.token || "").trim().toLowerCase(); if (!/^0x[0-9a-f]{40}$/.test(t)) return;
-  let sym = c.symbol || "", ok = false; try { const [code, sy, de] = await Promise.all([rpc("eth_getCode", [t, "latest"]), rpc("eth_call", [{ to: t, data: "0x95d89b41" }, "latest"]), rpc("eth_call", [{ to: t, data: "0x313ce567" }, "latest"])]);
-    ok = code && code !== "0x" && de && de !== "0x"; try { const b = sy.slice(2), n = parseInt(b.slice(64, 128), 16); sym = decodeURIComponent(b.slice(128, 128 + n * 2).replace(/../g, "%$&")) || sym; } catch {} } catch {}
-  if (!ok) return; const st = $("tkState"); st.hidden = false; st.textContent = "LIVE"; st.classList.add("live"); $("tokbar").querySelector(".tk-l").textContent = "◆ " + (sym ? "$" + sym : "TOKEN") + " · ROBINHOOD CHAIN";
+  const bar = $("tokbar"), lab = bar.querySelector(".tk-l"), st = $("tkState"); lab.textContent = "◆ " + (c.symbol ? "$" + c.symbol : "$RUBY") + " · ROBINHOOD CHAIN";
   $("tkCa").innerHTML = `CA <code>${t}</code>`; const cp = $("tkCopy"); cp.hidden = false; cp.onclick = async () => { try { await navigator.clipboard.writeText(t); cp.textContent = "Copied"; } catch { cp.textContent = t; } setTimeout(() => (cp.textContent = "Copy CA"), 1500); };
-  const ex = $("tkExp"); ex.href = `${EXP}/token/${t}`; ex.hidden = false; if (/^https:\/\//.test(c.tokenUrl || "")) { const lp = $("tkLp"); lp.href = c.tokenUrl; lp.hidden = false; } }).catch(() => {}); })();
+  const ex = $("tkExp"); ex.href = `${EXP}/token/${t}`; ex.hidden = false; if (/^https:\/\//.test(c.tokenUrl || "")) { const lp = $("tkLp"); lp.href = c.tokenUrl; lp.hidden = false; }
+  st.hidden = false; st.textContent = "CHECKING"; st.classList.remove("live");
+  const check = async (n) => { try { const [code, sy, de] = await Promise.all([rpc("eth_getCode", [t, "latest"]), rpc("eth_call", [{ to: t, data: "0x95d89b41" }, "latest"]), rpc("eth_call", [{ to: t, data: "0x313ce567" }, "latest"])]);
+      if (code && code !== "0x" && de && de !== "0x") { let sym = ""; try { const h = sy.slice(2), k = parseInt(h.slice(64, 128), 16); sym = decodeURIComponent(h.slice(128, 128 + k * 2).replace(/../g, "%$&")); } catch {} if (sym) lab.textContent = "◆ $" + sym + " · ROBINHOOD CHAIN"; st.textContent = "LIVE"; st.classList.add("live"); return; }
+      st.textContent = "NOT FOUND"; } catch { st.textContent = "CHECKING"; if (n < 20) setTimeout(() => check(n + 1), 8000); } };
+  check(0); }).catch(() => {}); })();
 
 // ---------- R9 x402 Watch: every USDG transferWithAuthorization (EIP-3009) on Robinhood Chain, paired with its transfer ----------
 window.RubyX402 = (() => {
