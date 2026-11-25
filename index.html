@@ -236,8 +236,8 @@ npx -y github:rubykit-star/ruby pool 0x…pair</div><p class="note2" style="marg
 <section class="view" id="map"><div class="page"><div class="ph2"><div class="ey">R14 · MAP</div><h1>Who is linked. <em>And how we know.</em></h1><p>Paste a token. Ruby maps its top holders and draws a line only where the chain proves a link: a direct transfer, a buy in the same transaction, or the same USDG / WETH sender before buying. Every line has its transaction. Contracts like the curve, the pool and the locker are named from Sourcify and set aside, not counted as whales.</p></div>
 <div class="box gold"><b>Paste a token contract</b><div class="inp"><input id="mca" placeholder="0x… token contract address" spellcheck="false" autocomplete="off"><button class="btn" id="mgo" type="button">Map ▸</button></div><div class="mini"><button type="button" id="mruby">$RUBY</button></div><div class="lg2" id="mlog" aria-live="polite"></div></div>
 <div id="mout"></div></div></section>
-<section class="view" id="pool"><div class="page"><div class="ph2"><div class="ey">R10 · POOL</div><h1>Any DLMM pool. <em>Read from the contract.</em></h1><p>Robinhood Chain has live DLMM pools, stock tokens included. Paste a pool address: your browser reads its active bin and price, reserves, the bins around the price, fees and the last 24 hours of swaps. Facts with links, never a score.</p></div><div class="grid2" style="margin-top:22px;align-items:start">
-<div><div class="box gold"><b>Paste a DLMM pool (pair) address</b><div class="inp"><input id="pa" placeholder="0x… pool address" spellcheck="false" autocomplete="off"><button class="btn" id="pgo" type="button">Read ▸</button></div><div class="mini" id="pchips"></div><div class="lg2" id="plog" aria-live="polite"></div></div>
+<section class="view" id="pool"><div class="page"><div class="ph2"><div class="ey">R10 · POOL</div><h1>DLMM and Uniswap V4. <em>Read from the contract.</em></h1><p>Paste a DLMM pair address (0x + 40 hex) or a Uniswap V4 pool id (0x + 64 hex). Your browser reads the price, liquidity, fees or hook, and the last 24 hours of swaps straight from Robinhood Chain. Facts with links, never a score.</p></div><div class="grid2" style="margin-top:22px;align-items:start">
+<div><div class="box gold"><b>Paste a DLMM pair address or a V4 pool id</b><div class="inp"><input id="pa" placeholder="0x… pair address (DLMM) or 0x… pool id (Uniswap V4)" spellcheck="false" autocomplete="off"><button class="btn" id="pgo" type="button">Read ▸</button></div><div class="mini" id="pchips"></div><div class="lg2" id="plog" aria-live="polite"></div></div>
 <div class="box"><b>In your terminal, or from your AI</b><div class="code">npx -y github:rubykit-star/ruby pool 0x…pair</div><p class="note2" style="margin-top:10px">Writes Pools/&lt;X&gt;-&lt;Y&gt; &lt;address&gt;.md in your vault. Agents get the same note with the <code>ruby_pool</code> MCP tool.</p></div>
 <div class="box"><b>Stated plainly</b><p class="note2">Ruby is not affiliated with any DLMM. Each pool is a small proxy that runs shared code; the note says whether that code is verified on Sourcify. A price from a thin pool can be far from other markets.</p></div></div>
 <div class="paper"><div class="nb"><span id="pfile">Pools/… .md</span></div><pre class="fm" id="pfm">paste a pool address or pick one</pre><div class="md" id="pmd"><p>The note appears here, written from Robinhood Chain in your browser.</p></div><div style="padding:0 14px 12px;font:500 11px 'JetBrains Mono',monospace;color:#9a8264" id="pcap"></div></div></div></div></section>
@@ -735,6 +735,42 @@ let started = false; return { start() { if (started) return; started = true; boo
   $("go").onclick = run; $("ca").addEventListener("keydown", (e) => { if (e.key === "Enter") run(); });
 })();
 
+// ---------- Uniswap V4 pools: read from the PoolManager (pool key from Initialize, state via extsload) ----------
+window.RubyV4 = (() => {
+  const PM = "0x8366a39cc670b4001a1121b8f6a443a643e40951", T_INIT = "0xdd466e674ea557f56295e2d0218a125ea4b4f0f6f3307b95f85e6110838d6438", T_SWAP = "0x40e9cecb9f5f1f1c5b9c97dec2917b7ee92e57ba5563708daca94dd84ad7112f";
+  const ETH = "0x0000000000000000000000000000000000000000", WETH = "0x0bd7d308f8e1639fab988df18a8011f41eacad73", USDG = "0x5fc5360d0400a0fd4f2af552add042d716f1d168";
+  const RC = [1n, 0x8082n, 0x800000000000808an, 0x8000000080008000n, 0x808bn, 0x80000001n, 0x8000000080008081n, 0x8000000000008009n, 0x8an, 0x88n, 0x80008009n, 0x8000000an, 0x8000808bn, 0x800000000000008bn, 0x8000000000008089n, 0x8000000000008003n, 0x8000000000008002n, 0x8000000000000080n, 0x800an, 0x800000008000000an, 0x8000000080008081n, 0x8000000000008080n, 0x80000001n, 0x8000000080008008n];
+  const ROT = [0, 1, 62, 28, 27, 36, 44, 6, 55, 20, 3, 10, 43, 25, 39, 41, 45, 15, 21, 8, 18, 2, 61, 56, 14], M = (1n << 64n) - 1n, rl = (x, n) => (n === 0 ? x : ((x << BigInt(n)) | (x >> BigInt(64 - n))) & M);
+  function keccak(bytes) { const s = new Array(25).fill(0n), p = new Uint8Array(Math.ceil((bytes.length + 1) / 136) * 136); p.set(bytes); p[bytes.length] ^= 1; p[p.length - 1] ^= 0x80;
+    for (let o = 0; o < p.length; o += 136) { for (let i = 0; i < 17; i++) { let v = 0n; for (let b = 7; b >= 0; b--) v = (v << 8n) | BigInt(p[o + i * 8 + b]); s[i] ^= v; }
+      for (let r = 0; r < 24; r++) { const C = [0, 1, 2, 3, 4].map((x) => s[x] ^ s[x + 5] ^ s[x + 10] ^ s[x + 15] ^ s[x + 20]); for (let x = 0; x < 5; x++) { const D = C[(x + 4) % 5] ^ rl(C[(x + 1) % 5], 1); for (let y = 0; y < 25; y += 5) s[y + x] ^= D; }
+        const B = new Array(25); for (let x = 0; x < 5; x++) for (let y = 0; y < 5; y++) B[y + 5 * ((2 * x + 3 * y) % 5)] = rl(s[x + 5 * y], ROT[x + 5 * y]);
+        for (let x = 0; x < 5; x++) for (let y = 0; y < 5; y++) s[x + 5 * y] = B[x + 5 * y] ^ (~B[((x + 1) % 5) + 5 * y] & M & B[((x + 2) % 5) + 5 * y]); s[0] ^= RC[r]; } }
+    let out = "0x"; for (let i = 0; i < 4; i++) { let v = s[i]; for (let b = 0; b < 8; b++) { out += Number(v & 0xffn).toString(16).padStart(2, "0"); v >>= 8n; } } return out; }
+  const hb = (h) => Uint8Array.from(h.replace(/^0x/, "").match(/../g).map((x) => parseInt(x, 16))), pad = (n) => BigInt(n).toString(16).padStart(64, "0"), hx = (n) => "0x" + n.toString(16);
+  const call = (to, data) => rpc("eth_call", [{ to, data }, "latest"]).catch(() => "0x");
+  const str = (h) => { if (!h || h === "0x") return null; const b = h.slice(2); try { if (b.length === 64) return decodeURIComponent(b.replace(/(00)+$/, "").replace(/../g, "%$&")); const k = parseInt(b.slice(64, 128), 16); return decodeURIComponent(b.slice(128, 128 + k * 2).replace(/../g, "%$&")); } catch { return null; } };
+  const meta = async (t) => { if (t === ETH) return { sym: "ETH", dec: 18 }; const [s, d] = await Promise.all([call(t, "0x95d89b41"), call(t, "0x313ce567")]); return { sym: str(s) || t.slice(0, 6), dec: d && d !== "0x" ? Number(BigInt(d)) : 18 }; };
+  const kyber = async (t, d) => { if (t === USDG) return 1; try { const j = await (await fetch(`https://aggregator-api.kyberswap.com/robinhood/api/v1/routes?tokenIn=${USDG}&tokenOut=${t === ETH ? WETH : t}&amountIn=1000000000`, { headers: { "x-client-id": "ruby" } })).json(); if (j.code !== 0) return null; const o = Number(BigInt(j.data.routeSummary.amountOut)) / 10 ** d; return o > 0 ? 1000 / o : null; } catch { return null; } };
+  const hookName = async (a) => { try { const j = await (await fetch(`https://sourcify.dev/server/v2/contract/4663/${a}?fields=compilation`)).json(); return j.match ? (j.compilation && j.compilation.name) || "verified" : "not verified"; } catch { return "could not check"; } };
+  async function read(id) {
+    id = id.toLowerCase(); const head = parseInt(await rpc("eth_blockNumber", []), 16); let init = [];
+    for (let to = head; to > 0 && !init.length; to -= 9000000) init = await rpc("eth_getLogs", [{ address: PM, topics: [T_INIT, id], fromBlock: hx(Math.max(0, to - 8999999)), toBlock: hx(to) }]);
+    if (!init.length) throw new Error("No Uniswap V4 pool with this id in the PoolManager on Robinhood Chain.");
+    const l = init[0], c0 = "0x" + l.topics[2].slice(26), c1 = "0x" + l.topics[3].slice(26), fee = parseInt(l.data.slice(2, 66), 16), tickSpacing = Number(BigInt.asIntN(24, BigInt("0x" + l.data.slice(66, 130)))), hooks = "0x" + l.data.slice(2 + 128 + 24, 2 + 192);
+    const slot = keccak(hb(id + pad(6))), s0 = BigInt(await call(PM, "0x1e2eaeaf" + slot.slice(2))), L = BigInt(await call(PM, "0x1e2eaeaf" + pad(BigInt(slot) + 3n)));
+    const sqrtP = s0 & ((1n << 160n) - 1n), tick = Number(BigInt.asIntN(24, (s0 >> 160n) & 0xffffffn));
+    const [X, Y] = await Promise.all([meta(c0), meta(c1)]), sq = Number(sqrtP) / 2 ** 96, price = sq * sq * 10 ** (X.dec - Y.dec);
+    const [u0, u1, hn] = await Promise.all([kyber(c0, X.dec), kyber(c1, Y.dec), hooks !== ETH ? hookName(hooks) : null]);
+    const p0 = u0 ?? (u1 != null ? price * u1 : null), p1 = u1 ?? (u0 != null ? u0 / price : null);
+    const from = Math.max(parseInt(l.blockNumber, 16), head - 864000); const sw = await rpc("eth_getLogs", [{ address: PM, topics: [T_SWAP, id], fromBlock: hx(from), toBlock: hx(head) }]).catch(() => []);
+    let v0 = 0, v1 = 0, buys = 0; const txs = sw.map((x) => { const a0 = Number(BigInt.asIntN(128, BigInt("0x" + x.data.slice(2, 66)))) / 10 ** X.dec, a1 = Number(BigInt.asIntN(128, BigInt("0x" + x.data.slice(66, 130)))) / 10 ** Y.dec; v0 += Math.abs(a0); v1 += Math.abs(a1); if (a1 > 0) buys++; return { b: parseInt(x.blockNumber, 16), a0, a1, tx: x.transactionHash }; });
+    return { id, head, c0, c1, X, Y, fee, dynamic: (fee & 0x800000) !== 0, tickSpacing, hooks, hookName: hn, tick, L, price, p0, p1, inRange0: sq ? Number(L) / sq / 10 ** X.dec : 0, inRange1: (Number(L) * sq) / 10 ** Y.dec,
+      initBlock: parseInt(l.blockNumber, 16), initTx: l.transactionHash, swaps: sw.length, buys, sells: sw.length - buys, vol0: v0, vol1: v1, volUsd: p0 != null ? v0 * p0 : p1 != null ? v1 * p1 : null, recent: txs.slice(-8).reverse() };
+  }
+  return { read, PM };
+})();
+
 // ---------- R10 Pool: a DLMM (liquidity book) pool, read from its own contract ----------
 (() => {
   const USDG = "0x5fc5360d0400a0fd4f2af552add042d716f1d168", ID0 = 8388608, SWAP = "0xad7d6f97abf51ce18e17a38f4d70e975be9c0708474987bb3e26ad21bd93ca70";
@@ -747,11 +783,12 @@ let started = false; return { start() { if (started) return; started = true; boo
   const str = (h) => { if (!h || h === "0x") return null; const b = h.slice(2); try { if (b.length === 64) return decodeURIComponent(b.replace(/(00)+$/, "").replace(/../g, "%$&")); const k = parseInt(b.slice(64, 128), 16); return decodeURIComponent(b.slice(128, 128 + k * 2).replace(/../g, "%$&")); } catch { return null; } };
   const ver = async (a) => { try { const j = await (await fetch(`https://sourcify.dev/server/v2/contract/4663/${a}`)).json(); return j.match === "exact_match" ? "exact match" : j.match || "not verified"; } catch { return "could not check"; } };
   const say = (c, m) => { $("plog").innerHTML += `<div class="${c}">${esc(m)}</div>`; };
-  [["TSLA / USDG", "0x2bbde3801977ddbc3e2f3971a48051e7502723e9"], ["WETH / USDG", "0xcc8e5adab080104b8ca801ee1fb2b1c3a876fd7d"]].forEach(([l, a]) => { const b = document.createElement("button"); b.type = "button"; b.textContent = l; b.onclick = () => { $("pa").value = a; run(); }; $("pchips").appendChild(b); });
+  [["TSLA / USDG", "0x2bbde3801977ddbc3e2f3971a48051e7502723e9"], ["WETH / USDG", "0xcc8e5adab080104b8ca801ee1fb2b1c3a876fd7d"], ["ETH / RUBY · V4", "0x97883a330870c941eaaac99377f4783613a879c2617492338032b7e390e2ef83"]].forEach(([l, a]) => { const b = document.createElement("button"); b.type = "button"; b.textContent = l; b.onclick = () => { $("pa").value = a; run(); }; $("pchips").appendChild(b); });
   let busy = false;
   async function run() {
     const P = $("pa").value.trim().toLowerCase(); if (busy) return; $("plog").innerHTML = "";
-    if (!/^0x[0-9a-f]{40}$/.test(P)) return say("no", "Paste a 0x… pool address (42 characters).");
+    if (/^0x[0-9a-f]{64}$/.test(P)) return runV4(P);
+    if (!/^0x[0-9a-f]{40}$/.test(P)) return say("no", "Paste a DLMM pair address (0x + 40 hex) or a Uniswap V4 pool id (0x + 64 hex).");
     busy = true; $("pgo").textContent = "Reading…";
     try {
       const [x, y, bs, act] = await Promise.all([call(P, S.x), call(P, S.y), call(P, S.bs), call(P, S.act)]);
@@ -785,6 +822,23 @@ let started = false; return { start() { if (started) return; started = true; boo
         <h4>Fees</h4><table>${tr(["base fee", baseFee.toFixed(2) + "% per swap, plus a variable part when the price moves"])}${tr(["protocol share", share.toFixed(2) + "% of fees"])}</table>
         <h4>Last 24 hours</h4>${sw ? `<table>${tr(["swaps", `${txs.size} transactions (${sw.length} bin fills) by ${who.size} addresses`])}${tr(["volume in", `${f(inX)} ${esc(X.sym)} · ${f(inY)} ${esc(Y.sym)}${vol != null ? ` · about ${f(vol)} USDG` : ""}`])}${tr(["fees paid", `${f(feeX)} ${esc(X.sym)} · ${f(feeY)} ${esc(Y.sym)}${fees != null ? ` · about ${f(fees)} USDG` : ""}`])}</table>${recent ? `<table>${tr(["block", "swap", "in", "out", "tx"], 1)}${recent}</table>` : ""}` : "<p>Could not read the swaps right now.</p>"}`;
       $("pfile").textContent = `Pools/${X.sym}-${Y.sym} ${P.slice(0, 6)}.md`; $("pcap").innerHTML = "Written in your browser from Robinhood Chain just now. <code>ruby pool</code> saves the same note to your vault.";
+      say("ok", "note written");
+    } catch (e) { say("no", e.message); } finally { busy = false; $("pgo").textContent = "Read ▸"; }
+  }
+  async function runV4(id) {
+    busy = true; $("pgo").textContent = "Reading…";
+    try { say("ok", "Uniswap V4 · reading the pool key and state from PoolManager…"); const R = await window.RubyV4.read(id), sx = R.X.sym, sy = R.Y.sym;
+      say("ok", `${sx} / ${sy} · 1 ${sx} = ${f(R.price, 8)} ${sy}`);
+      $("pfm").textContent = "---\n" + [["type", '"pool"'], ["dex", '"uniswap-v4"'], ["pool_id", JSON.stringify(R.id)], ["symbol_x", JSON.stringify(sx)], ["symbol_y", JSON.stringify(sy)], ["tick", R.tick], ["price", +R.price.toPrecision(8)], ["hooks", JSON.stringify(R.hooks)], ["swaps_24h", R.swaps], ["block", R.head], ["tags", '["pool", "uniswap-v4", "robinhood-chain"]']].map(([k, v]) => `${k}: ${v}`).join("\n") + "\n---";
+      const tok = (a, s) => (a === "0x0000000000000000000000000000000000000000" ? "ETH (native)" : A(`${EXP}/token/${a}`, s));
+      $("pmd").innerHTML = `<h3>${esc(sx)} / ${esc(sy)} · Uniswap V4 pool</h3><p>Read from the PoolManager on Robinhood Chain mainnet at block ${R.head.toLocaleString("en-US")}, in your browser just now.</p>
+        <h4>Pool</h4><table>${tr(["pool id", `<code>${R.id.slice(0, 18)}…${R.id.slice(-6)}</code>`])}${tr(["PoolManager", A(`${EXP}/address/${window.RubyV4.PM}`, short(window.RubyV4.PM)) + " · holds every V4 pool's tokens"])}${tr(["currencies", `${tok(R.c0, sx)} · ${tok(R.c1, sy)}`])}${tr(["fee in the key", R.dynamic ? "dynamic (set by the hook)" : (R.fee / 1e4).toFixed(2) + "%"])}${tr(["tick spacing", String(R.tickSpacing)])}${tr(["hooks", R.hooks === "0x0000000000000000000000000000000000000000" ? "none" : `${A(`${EXP}/address/${R.hooks}`, short(R.hooks))} · ${esc(R.hookName || "")}`])}${tr(["created", `block ${R.initBlock.toLocaleString("en-US")} · ${A(`${EXP}/tx/${R.initTx}`, short(R.initTx))}`])}</table>
+        <p>A hook is a contract the pool calls on every swap. It can add fees or rules: read its source before trading.</p>
+        <h4>Price</h4><table>${tr(["current tick", R.tick.toLocaleString("en-US")])}${tr([`1 ${esc(sx)}`, `${f(R.price, 8)} ${esc(sy)}`])}${tr([`1 ${esc(sy)}`, `${f(1 / R.price, 8)} ${esc(sx)}`])}${R.p0 != null ? tr([`1 ${esc(sx)} in USDG`, f(R.p0, 6)]) : ""}${R.p1 != null ? tr([`1 ${esc(sy)} in USDG`, f(R.p1, 6)]) : ""}</table>
+        <h4>Liquidity at this price</h4><table>${tr(["active liquidity (L)", R.L.toLocaleString("en-US")])}${tr([`as ${esc(sx)}`, f(R.inRange0)])}${tr([`as ${esc(sy)}`, f(R.inRange1)])}</table><p>V4 keeps every pool's tokens in one PoolManager, so these are the virtual amounts of the liquidity active at this price, not a full reserve count.</p>
+        <h4>Last 24 hours</h4><table>${tr(["swaps", `${R.swaps} · ${esc(sy)} bought ${R.buys} / sold ${R.sells}`])}${tr(["volume", `${f(R.vol0)} ${esc(sx)} · ${f(R.vol1)} ${esc(sy)}${R.volUsd != null ? ` · about ${f(R.volUsd)} USDG` : ""}`])}</table>
+        ${R.recent.length ? `<table>${tr(["block", "swap", esc(sx), esc(sy), "tx"], 1)}${R.recent.map((t) => tr([t.b.toLocaleString("en-US"), t.a1 > 0 ? `buy ${esc(sy)}` : `sell ${esc(sy)}`, f(Math.abs(t.a0)), f(Math.abs(t.a1)), A(`${EXP}/tx/${t.tx}`, short(t.tx))])).join("")}</table>` : ""}`;
+      $("pfile").textContent = `Pools/${sx}-${sy} v4 ${R.id.slice(0, 8)}.md`; $("pcap").innerHTML = "Written in your browser from Robinhood Chain just now. <code>ruby pool &lt;pool id&gt;</code> saves the same note to your vault.";
       say("ok", "note written");
     } catch (e) { say("no", e.message); } finally { busy = false; $("pgo").textContent = "Read ▸"; }
   }
@@ -994,7 +1048,10 @@ window.RubyConsole = (() => {
       const data = { token: t, symbol: str(sy), name: str(nm), decimals: de, totalSupply: sup, burnedPct: sup ? (burned / sup) * 100 : 0, owner, sourcify: v, priceUsdg: px };
       return { data, text: [row("token", `<b>${esc(data.symbol || "?")}</b> · ${esc(data.name || "")} · ${L(t, "token")}`), row("source (Sourcify)", esc(v)), row("owner()", owner ? (/^0x0+$/.test(owner) ? "renounced (0x0)" : L(owner)) : "no owner() function"), row("total supply", f(sup)), row("burned (0x…dEaD)", f(burned) + ` · ${data.burnedPct.toFixed(2)}%`), row("price", px ? f(px, 6) + " USDG (live quote of 1,000 USDG)" : "no route right now")].join("\n"), src: ["rpc", "sourcify", px && t !== USDG ? "kyberswap" : null].filter(Boolean) }; } },
     pool: { u: "pool <pair>", d: "a DLMM pool: price, bin step, reserves, fees", run: async (a) => {
-      const P = (a[0] || "").toLowerCase(); if (!isA(P)) throw new Error("usage: pool 0x…pair   (try: pool 0x2bbde3801977ddbc3e2f3971a48051e7502723e9)");
+      const P = (a[0] || "").toLowerCase();
+      if (/^0x[0-9a-f]{64}$/.test(P)) { const R = await window.RubyV4.read(P), data = { dex: "uniswap-v4", poolId: R.id, x: R.X.sym, y: R.Y.sym, tick: R.tick, price: R.price, hooks: R.hooks, hookName: R.hookName, swaps24h: R.swaps, volume24hUsdg: R.volUsd };
+        return { data, text: [row("pool", `<b>${esc(R.X.sym)} / ${esc(R.Y.sym)}</b> · Uniswap V4`), row("price", `1 ${esc(R.X.sym)} = <b>${f(R.price, 8)}</b> ${esc(R.Y.sym)}`), R.p1 != null ? row(`1 ${R.Y.sym} in USDG`, f(R.p1, 6)) : "", row("hook", R.hooks === "0x0000000000000000000000000000000000000000" ? "none" : `${L(R.hooks)} · ${esc(R.hookName || "")}`), row("swaps · 24h", `${R.swaps} (bought ${R.buys} / sold ${R.sells})`), row("volume · 24h", R.volUsd != null ? "≈ " + f(R.volUsd) + " USDG" : "–")].filter(Boolean).join("\n"), src: ["rpc", "poolmanager", "sourcify", "kyberswap"] }; }
+      if (!isA(P)) throw new Error("usage: pool 0x…pair (DLMM) or pool 0x…pool id (Uniswap V4)");
       const [x, y, bs, act, res, sf] = await Promise.all(["0x05e8746d", "0xda10610c", "0x17f11ecc", "0xdbe65edc", "0x0902f1ac", "0x7ca0de30"].map((s) => call(P, s)));
       if ([x, y, bs, act].some((r) => !r || r.length < 66)) throw new Error("this address does not answer as a DLMM pool");
       const tx = ta(x), ty = ta(y), step = Number(BigInt(bs)), id = Number(BigInt(act)), [dx, dy, sx, sy2] = await Promise.all([dec(tx), dec(ty), sym(tx), sym(ty)]);
@@ -1052,7 +1109,7 @@ window.RubyAsk = (() => {
     ["ruby_block", "block", "The chain right now: latest block, time, seconds per block, gas price, Ethereum L1 block.", {}],
     ["ruby_radar", "radar", "Latest launches on the Pons launchpad: token, age, dev buy in ETH, whether the creator sold, buys and sells.", { count: { type: "integer", description: "how many launches, 1-15" } }],
     ["ruby_clip", "clip", "Facts about a token from its contract address: name, symbol, Sourcify status, owner, supply, burned share, live USDG price.", { address: { type: "string", description: "token contract 0x…" } }, ["address"]],
-    ["ruby_pool", "pool", "A DLMM pool from its pair address: tokens, price from the active bin, bin step, reserves, value in USDG, base fee.", { address: { type: "string", description: "pool (pair) contract 0x…" } }, ["address"]],
+    ["ruby_pool", "pool", "A pool: give a DLMM pair address (0x + 40 hex) or a Uniswap V4 pool id (0x + 64 hex). Returns tokens, price, liquidity, fee or hook, and 24h swaps for V4.", { address: { type: "string", description: "DLMM pair 0x… (40 hex) or Uniswap V4 pool id 0x… (64 hex)" } }, ["address"]],
     ["ruby_x402", "x402", "USDG transfer-by-signature (how x402 settles) in the last 1-6 hours: payments, USDG moved, payers, payees, top payees.", { hours: { type: "integer", description: "1-6" } }],
     ["ruby_stocks", "stocks", "The 12 stock tokens on Robinhood Chain: live USDG price and Sourcify status each.", {}],
     ["ruby_proofs", "proofs", "Ruby Proof records on chain: how many, by how many provers, the latest ones.", {}],
@@ -1060,7 +1117,7 @@ window.RubyAsk = (() => {
   const toolDefs = TOOLS.map(([name, , d, props, req]) => ({ type: "function", function: { name, description: d, parameters: { type: "object", properties: props, required: req || [] } } }));
   const SYSTEM = `You are Ask Ruby, on rubykit.cc. You answer questions about Robinhood Chain (chain id 4663) using Ruby's tools, which read the chain live in the user's browser.
 Rules: use a tool for every on-chain number and never invent one. State the block or time a fact was read at when the tool gives it. Name the source of each fact (rpc, sourcify, kyberswap, pons events). Facts only: never give a score, a rating, a prediction, or buy or sell advice, and never call a token safe. If a tool can't answer, say so. Never ask for a private key, seed phrase or password. Keep answers short and plain.
-Known addresses on Robinhood Chain: DLMM pools TSLA/USDG 0x2bbde3801977ddbc3e2f3971a48051e7502723e9 and WETH/USDG 0xcc8e5adab080104b8ca801ee1fb2b1c3a876fd7d (use ruby_pool for a pool price); the $RUBY token 0x48447ce272824776c7f21d8741dba38ca1586475; USDG 0x5fc5360d0400a0fd4f2af552add042d716f1d168. For a stock token's own price use ruby_stocks.`;
+Known addresses on Robinhood Chain: DLMM pools TSLA/USDG 0x2bbde3801977ddbc3e2f3971a48051e7502723e9 and WETH/USDG 0xcc8e5adab080104b8ca801ee1fb2b1c3a876fd7d (use ruby_pool for a pool price); the RUBY token 0x48447ce272824776c7f21d8741dba38ca1586475, whose Uniswap V4 pool (ETH/RUBY) has pool id 0x97883a330870c941eaaac99377f4783613a879c2617492338032b7e390e2ef83; USDG 0x5fc5360d0400a0fd4f2af552add042d716f1d168. For a stock token's own price use ruby_stocks.`;
   const say = (cls, html) => { const d = document.createElement("div"); d.className = "am " + cls; d.innerHTML = html; $("alog").appendChild(d); $("alog").scrollTop = $("alog").scrollHeight; return d; };
   const md = (t) => esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\n/g, "<br>");
   function paintKey() { $("akeyst").textContent = key ? "key set · " + key.slice(0, 7) + "…" + key.slice(-4) + (get(KEYSTORE) ? " · remembered on this device" : " · this tab only") : "no key yet"; $("aforget").hidden = !key; }
