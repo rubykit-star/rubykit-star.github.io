@@ -149,6 +149,22 @@ a{color:inherit}
 #kout{height:440px;overflow:auto;padding:14px 16px;font:500 12.5px/1.75 "JetBrains Mono",monospace;color:var(--cream);white-space:pre;}
 #kout a{color:#e8be6e;text-decoration:underline;text-underline-offset:2px}#kout .kp{color:#d61f45;font-weight:800}#kout .kk{color:#e8be6e}#kout .km{color:var(--mute)}#kout .kr{color:#ff6b80}
 #kout .kcmd{margin-top:12px;color:#fff}#kout .kerr{color:#ff6b80}#kout .ksrc{margin-bottom:4px}
+
+
+#alog{height:460px;overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;font:13px/1.6 "JetBrains Mono",monospace}
+.am{max-width:88%;padding:10px 13px;border-radius:6px;white-space:normal;word-break:break-word}
+.am.auser{align-self:flex-end;background:rgba(232,190,110,.16);border:1px solid rgba(232,190,110,.4);color:var(--cream)}
+.am.abot{align-self:flex-start;background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--cream)}
+.am.atool{align-self:flex-start;padding:2px 4px;font-size:12px;color:var(--cream)}.am.atool .kp{color:#d61f45;font-weight:800}.am.atool .km{color:var(--mute)}
+.am.await{align-self:flex-start;color:var(--mute);padding:2px 4px}.am.aerr{align-self:stretch;color:#ff6b80;padding:2px 4px}.am.ainfo{align-self:stretch;color:var(--mute);padding:2px 4px;font-size:12px}
+.am code{color:#e8be6e}
+#aform{display:flex;gap:10px;align-items:flex-end;padding:10px 14px;border-top:1px solid var(--line);background:rgba(0,0,0,.35)}
+#aq{flex:1;min-width:0;resize:none;background:transparent;border:0;outline:0;color:var(--cream);font:500 13px/1.5 "JetBrains Mono",monospace}
+#achips{display:flex;gap:6px;flex-wrap:wrap;padding:10px 14px 0}#achips button{font:500 11.5px "JetBrains Mono",monospace;background:transparent;color:var(--mute);border:1px solid var(--line);border-radius:3px;padding:5px 9px;cursor:pointer}#achips button:hover{color:#e8be6e;border-color:#e8be6e}
+.akey{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}.akey input[type=password]{flex:1;min-width:200px;background:#0e0a06;color:var(--ink);border:1px solid var(--line);border-radius:3px;padding:9px;font:12px "JetBrains Mono",monospace}
+.akey label{font:500 11.5px "JetBrains Mono",monospace;color:var(--mute);display:flex;gap:6px;align-items:center}
+#amodel{width:100%;margin-top:8px;background:#0e0a06;color:var(--ink);border:1px solid var(--line);border-radius:3px;padding:9px;font:12px "JetBrains Mono",monospace}
+@media (max-width:760px){#alog{height:400px;font-size:12px}.am{max-width:96%}}
 #kform{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--line);background:rgba(0,0,0,.35)}
 #kform label{font:800 13px "JetBrains Mono",monospace;color:#d61f45;white-space:nowrap}
 #kin{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--cream);font:500 13px "JetBrains Mono",monospace}
@@ -165,7 +181,7 @@ a{color:inherit}
 </style>
 </head>
 <body>
-<header class="site"><div class="in"><a class="lg" href="/"><svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><path d="M9 6h14l6 7-13 16L3 13Z" fill="#d61f45"/><path d="M3 13h26l-6-7H9Z" fill="#e8be6e"/></svg>RUBY</a><nav aria-label="Main"><a href="/">Home</a><a href="/console">Console</a><a href="/x402">x402</a><a href="/chain">Chain</a><a href="/radar">Radar</a><a href="/clip">Clip</a><a href="/pool">Pool</a><a href="/daily">Daily</a><a href="/memory">Memory</a><a href="/watch">Watch</a><a href="/privacy">Privacy</a><a href="/seal">Seal</a><a href="/proof">Proof</a><a href="/protocol">Protocol</a><a href="/start">Start</a></nav><span class="soc"><a href="https://x.com/rubykit_cc" target="_blank" rel="noopener" aria-label="Ruby on X"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M17.75 3h3.07l-6.7 7.66L22 21h-6.17l-4.83-6.32L5.47 21H2.4l7.17-8.2L2 3h6.33l4.37 5.77L17.75 3zm-1.08 16.17h1.7L7.4 4.74H5.58l11.09 14.43z"/></svg></a><a href="https://github.com/rubykit-star" target="_blank" rel="noopener" aria-label="Ruby on GitHub"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg></a></span><button type="button" class="cw" id="cw">Connect wallet</button></div></header>
+<header class="site"><div class="in"><a class="lg" href="/"><svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><path d="M9 6h14l6 7-13 16L3 13Z" fill="#d61f45"/><path d="M3 13h26l-6-7H9Z" fill="#e8be6e"/></svg>RUBY</a><nav aria-label="Main"><a href="/">Home</a><a href="/console">Console</a><a href="/ask">AI Model</a><a href="/x402">x402</a><a href="/chain">Chain</a><a href="/radar">Radar</a><a href="/clip">Clip</a><a href="/pool">Pool</a><a href="/daily">Daily</a><a href="/memory">Memory</a><a href="/watch">Watch</a><a href="/privacy">Privacy</a><a href="/seal">Seal</a><a href="/proof">Proof</a><a href="/protocol">Protocol</a><a href="/start">Start</a></nav><span class="soc"><a href="https://x.com/rubykit_cc" target="_blank" rel="noopener" aria-label="Ruby on X"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M17.75 3h3.07l-6.7 7.66L22 21h-6.17l-4.83-6.32L5.47 21H2.4l7.17-8.2L2 3h6.33l4.37 5.77L17.75 3zm-1.08 16.17h1.7L7.4 4.74H5.58l11.09 14.43z"/></svg></a><a href="https://github.com/rubykit-star" target="_blank" rel="noopener" aria-label="Ruby on GitHub"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg></a></span><button type="button" class="cw" id="cw">Connect wallet</button></div></header>
 <canvas id="bgm" aria-hidden="true"></canvas>
 <main>
 <section class="view" id="home"><div class="tokbar" id="tokbar"><span class="tk-l">◆ RUBY</span><span class="tk-s" id="tkState" hidden></span><span class="tk-ca" id="tkCa"><b style="color:var(--ink)">CA coming soon</b></span><span class="tk-b"><button type="button" id="tkCopy" hidden>Copy CA</button><a id="tkExp" target="_blank" rel="noopener" hidden>Explorer ↗</a><a id="tkLp" target="_blank" rel="noopener" hidden>Buy page ↗</a></span></div><div class="kit" style="position:relative;z-index:1">
@@ -198,6 +214,17 @@ a{color:inherit}
 <div class="box"><b>Same commands in your terminal</b><div class="code">npx -y github:rubykit-star/ruby radar
 npx -y github:rubykit-star/ruby clip 0x…token
 npx -y github:rubykit-star/ruby pool 0x…pair</div><p class="note2" style="margin-top:10px">The terminal writes each answer as a Markdown note in your vault. Agents get the same tools over MCP.</p></div></div></section>
+<section class="view" id="ask"><div class="page"><div class="ph2"><div class="ey">R13 · AI MODEL</div><h1>Ask any model. <em>It reads the chain.</em></h1><p>Pick one of hundreds of AI models and ask about Robinhood Chain. The model calls Ruby's tools, your browser reads the chain live, and the answer names its sources. Bring your own OpenRouter key: it stays in this browser and goes only to openrouter.ai. Ruby has no server in between.</p></div>
+<div class="grid2" style="margin-top:22px;align-items:start;grid-template-columns:minmax(0,2fr) minmax(0,1fr)">
+<div class="kwin" style="margin-top:0"><div class="kbar"><i class="gem"></i><b>ruby ai model</b><span>robinhood chain · mainnet 4663 · tools read only</span><button type="button" id="anew">New chat</button></div>
+<div id="achips"><button type="button">What is the TSLA/USDG pool price right now?</button><button type="button">Show me the latest launches and whether the dev sold.</button><button type="button">How much USDG moved by x402 in the last hour?</button><button type="button">Check the $RUBY token 0x48447ce272824776c7f21d8741dba38ca1586475</button></div>
+<div id="alog" aria-live="polite"></div>
+<div id="aform"><textarea id="aq" rows="2" placeholder="Ask about Robinhood Chain… (Enter to send, Shift+Enter for a new line)" spellcheck="false"></textarea><button id="ago" class="btn" type="button" style="padding:9px 14px">Ask ↵</button></div></div>
+<div><div class="box gold" style="margin-top:0"><b>1 · Your OpenRouter key</b><p class="note2" style="margin-top:6px">Create one at openrouter.ai/keys and add a small credit. You pay OpenRouter directly, at their price.</p><div class="akey"><input type="password" id="akey" placeholder="sk-or-…" autocomplete="off" spellcheck="false"><button class="btn" id="akeysave" type="button" style="padding:9px 12px">Use key</button></div><div class="akey"><label><input type="checkbox" id="aremember"> remember on this device</label><button type="button" id="aforget" class="btn" style="padding:5px 9px;background:transparent;color:var(--cream);border:1px solid var(--line)" hidden>Forget key</button></div><p class="note2" id="akeyst" style="margin-top:6px">no key yet</p></div>
+<div class="box"><b>2 · Model</b><select id="amodel"><option>loading models…</option></select><p class="note2" id="acount" style="margin-top:6px">…</p></div>
+<div class="box"><b>3 · Prove an answer</b><p class="note2" style="margin-top:6px">Send the last answer and the exact tool data it used to Ruby Proof, then record it on chain from your own wallet.</p><button class="btn" id="aprove" type="button" style="padding:9px 12px;margin-top:8px" hidden>Prove this answer ▸</button></div>
+<div class="box"><b>See exactly what was sent</b><p class="note2" style="margin-top:6px">The last request your browser sent to OpenRouter, with your key masked. Ruby adds nothing else.</p><div class="code" id="areq" style="white-space:pre-wrap;max-height:260px;overflow:auto">nothing sent yet</div></div>
+<div class="box"><b>Stated plainly</b><p class="note2">Your questions go to OpenRouter and the model's provider, under their terms. Ruby's tools only read public chain data and never sign. Models can still be wrong: the tool lines show what was read, and each answer should name its source.</p></div></div></div></div></section>
 <section class="view" id="chain"><div class="page"><div class="ph2"><div class="ey">CHAIN</div><h1>Eight tools. <em>One chain.</em></h1><p>The pieces that make Robinhood Chain usable, each checked live. A starting list, open to change. Ruby is not affiliated with any of them, and inclusion is not an endorsement.</p></div><div class="cards" id="cards"></div></div></section>
 <section class="view" id="radar"><div class="page"><div class="ph2"><div class="ey">R1 · RADAR</div><h1>Every launch, <em>dissected live.</em></h1><p>The latest launches on the Pons launchpad, straight from its events: what the creator bought, whether they still hold it or sold it, who trades it and how much ETH sits in the curve. Facts with links, never a score.</p></div><div class="rstat"><div><b id="rCount">–</b>LAUNCHES SHOWN</div><div><b id="rTr">–</b>TRADERS</div><div><b id="rSold">–</b>DEVS SOLD</div></div>
 <div class="rtable" id="rtable"><div class="rrow h"><span class="c1">launched</span><span>token</span><span class="c3">creator</span><span class="c4">dev buy</span><span>dev now</span><span class="c6">buys/sells</span><span class="c7">ETH in curve</span><span>facts</span></div></div>
@@ -793,11 +820,11 @@ const BGM = (() => { const cv = $("bgm"), x = cv.getContext("2d"); let W, H, dpr
     x.strokeStyle = TH_.thr(0.3); x.lineWidth = 1.2; x.stroke(P[0]); x.strokeStyle = TH_.thr(0.9); x.lineWidth = 2.2; x.stroke(P[1]); x.globalCompositeOperation = "source-over"; }
   return { on() { if (!on) { on = true; size(); frame(); } }, off() { on = false; x.clearRect(0, 0, W, H); } }; })();
 // ---------- router: clean paths, one view per menu (404.html sends deep links back as ?p=) ----------
-(() => { const VIEWS = ["home", "console", "chain", "radar", "clip", "pool", "daily", "watch", "x402", "memory", "privacy", "seal", "proof", "protocol", "start"];
+(() => { const VIEWS = ["home", "console", "ask", "chain", "radar", "clip", "pool", "daily", "watch", "x402", "memory", "privacy", "seal", "proof", "protocol", "start"];
   const route = () => { const seg = location.pathname.replace(/\/+$/, "").split("/").pop().replace(/\.html$/, ""); return VIEWS.includes(seg) ? seg : "home"; };
   const q = new URLSearchParams(location.search).get("p"); if (q) history.replaceState(null, "", q);
   function show() { const id = route(); document.querySelectorAll(".view").forEach((v) => v.classList.toggle("on", v.id === id)); document.querySelectorAll(".site nav a").forEach((a) => a.classList.toggle("on", a.getAttribute("href") === (id === "home" ? "/" : "/" + id)));
-    scrollTo(0, 0); if (id === "home") { BGM.off(); B.size(); GEM.size(); placeNotes(0); show2(); } else BGM.on(); if (id === "radar") window.RubyRadar.start(); if (id === "memory") window.RubyMemory.start(); if (id === "watch" && window.RubyWatch) window.RubyWatch.start(); if (id === "x402" && window.RubyX402) window.RubyX402.start(); if (id === "proof" && window.RubyProof) window.RubyProof.start(); if (id === "console" && window.RubyConsole) window.RubyConsole.start(); document.title = id === "home" ? "Ruby · Chain Kit" : "Ruby · " + id[0].toUpperCase() + id.slice(1); }
+    scrollTo(0, 0); if (id === "home") { BGM.off(); B.size(); GEM.size(); placeNotes(0); show2(); } else BGM.on(); if (id === "radar") window.RubyRadar.start(); if (id === "memory") window.RubyMemory.start(); if (id === "watch" && window.RubyWatch) window.RubyWatch.start(); if (id === "x402" && window.RubyX402) window.RubyX402.start(); if (id === "proof" && window.RubyProof) window.RubyProof.start(); if (id === "console" && window.RubyConsole) window.RubyConsole.start(); if (id === "ask" && window.RubyAsk) window.RubyAsk.start(); document.title = id === "home" ? "Ruby · Chain Kit" : "Ruby · " + (id === "ask" ? "AI Model" : id[0].toUpperCase() + id.slice(1)); }
   document.addEventListener("click", (e) => { const a = e.target.closest("a[href]"); if (!a || e.metaKey || e.ctrlKey || a.target === "_blank") return; const h = a.getAttribute("href"); if (!h.startsWith("/") || h.startsWith("//")) return; const seg = h === "/" ? "home" : h.slice(1); if (!VIEWS.includes(seg)) return; e.preventDefault(); if (h !== location.pathname) history.pushState(null, "", h); show(); });
   addEventListener("popstate", show); show(); })();
 
@@ -1007,8 +1034,66 @@ window.RubyConsole = (() => {
   inp.addEventListener("keydown", (e) => { if (e.key === "ArrowUp" && hi > 0) { inp.value = hist[--hi]; e.preventDefault(); } else if (e.key === "ArrowDown") { hi = Math.min(hist.length, hi + 1); inp.value = hist[hi] || ""; e.preventDefault(); } });
   document.querySelectorAll("#ktabs button").forEach((b) => (b.onclick = () => { document.querySelectorAll("#ktabs button").forEach((x) => x.classList.toggle("on", x === b)); run(b.dataset.c); }));
   $("kreplay").onclick = () => last && run(last);
-  let started = false; const api = { start() { if (started) return; started = true; print(`  <span class="km">Ruby Console · every command reads Robinhood Chain live, in your browser. Type</span> <span class="kk">help</span><span class="km">, or pick a tab.</span>`); run("block"); }, run };
+  let started = false; const api = { tool: async (name, args) => { const c = CMDS[name]; if (!c || name === "clear" || name === "help") throw new Error("unknown tool " + name); return c.run(args || []); }, start() { if (started) return; started = true; print(`  <span class="km">Ruby Console · every command reads Robinhood Chain live, in your browser. Type</span> <span class="kk">help</span><span class="km">, or pick a tab.</span>`); run("block"); }, run };
   if (/\/console\/?$/.test(location.pathname)) setTimeout(() => api.start(), 0); return api;
+})();
+
+// ---------- R13 Ask Ruby: chat with any OpenRouter model that reads Robinhood Chain through Ruby's tools ----------
+// Your key stays in your browser and goes only to openrouter.ai. Ruby has no server: tools run here, read only.
+window.RubyAsk = (() => {
+  const $ = (i) => document.getElementById(i), esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const OR = "https://openrouter.ai/api/v1", KEYSTORE = "ruby.openrouter.key", MODELSTORE = "ruby.ask.model";
+  const get = (k) => { try { return localStorage.getItem(k); } catch { return null; } }, put = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} };
+  let key = get(KEYSTORE) || "", models = [], history = [], busy = false, lastSources = [], lastAnswer = "";
+  const TOOLS = [
+    ["ruby_block", "block", "The chain right now: latest block, time, seconds per block, gas price, Ethereum L1 block.", {}],
+    ["ruby_radar", "radar", "Latest launches on the Pons launchpad: token, age, dev buy in ETH, whether the creator sold, buys and sells.", { count: { type: "integer", description: "how many launches, 1-15" } }],
+    ["ruby_clip", "clip", "Facts about a token from its contract address: name, symbol, Sourcify status, owner, supply, burned share, live USDG price.", { address: { type: "string", description: "token contract 0x…" } }, ["address"]],
+    ["ruby_pool", "pool", "A DLMM pool from its pair address: tokens, price from the active bin, bin step, reserves, value in USDG, base fee.", { address: { type: "string", description: "pool (pair) contract 0x…" } }, ["address"]],
+    ["ruby_x402", "x402", "USDG transfer-by-signature (how x402 settles) in the last 1-6 hours: payments, USDG moved, payers, payees, top payees.", { hours: { type: "integer", description: "1-6" } }],
+    ["ruby_stocks", "stocks", "The 12 stock tokens on Robinhood Chain: live USDG price and Sourcify status each.", {}],
+    ["ruby_proofs", "proofs", "Ruby Proof records on chain: how many, by how many provers, the latest ones.", {}],
+  ];
+  const toolDefs = TOOLS.map(([name, , d, props, req]) => ({ type: "function", function: { name, description: d, parameters: { type: "object", properties: props, required: req || [] } } }));
+  const SYSTEM = `You are Ask Ruby, on rubykit.cc. You answer questions about Robinhood Chain (chain id 4663) using Ruby's tools, which read the chain live in the user's browser.
+Rules: use a tool for every on-chain number and never invent one. State the block or time a fact was read at when the tool gives it. Name the source of each fact (rpc, sourcify, kyberswap, pons events). Facts only: never give a score, a rating, a prediction, or buy or sell advice, and never call a token safe. If a tool can't answer, say so. Never ask for a private key, seed phrase or password. Keep answers short and plain.`;
+  const say = (cls, html) => { const d = document.createElement("div"); d.className = "am " + cls; d.innerHTML = html; $("alog").appendChild(d); $("alog").scrollTop = $("alog").scrollHeight; return d; };
+  const md = (t) => esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\n/g, "<br>");
+  function paintKey() { $("akeyst").textContent = key ? "key set · " + key.slice(0, 7) + "…" + key.slice(-4) + (get(KEYSTORE) ? " · remembered on this device" : " · this tab only") : "no key yet"; $("aforget").hidden = !key; }
+  async function loadModels() { try { const j = await (await fetch(OR + "/models")).json(); models = (j.data || []).filter((m) => (m.supported_parameters || []).includes("tools")).sort((a, b) => a.name.localeCompare(b.name));
+      const want = get(MODELSTORE) || "openai/gpt-4o-mini", sel = $("amodel"); sel.innerHTML = models.map((m) => { const p = m.pricing || {}, pi = Number(p.prompt) * 1e6, po = Number(p.completion) * 1e6; return `<option value="${esc(m.id)}"${m.id === want ? " selected" : ""}>${esc(m.name)}${isFinite(pi) ? ` · $${pi.toFixed(2)} / $${po.toFixed(2)} per 1M` : ""}</option>`; }).join("");
+      $("acount").textContent = models.length + " models that can use tools"; } catch (e) { $("acount").textContent = "could not load the model list: " + e.message; } }
+  async function complete(messages) {
+    const body = { model: $("amodel").value, messages, tools: toolDefs, tool_choice: "auto" };
+    $("areq").textContent = `POST ${OR}/chat/completions\nauthorization: Bearer ${key.slice(0, 7)}…${key.slice(-4)}   (your key, masked here)\ncontent-type: application/json\nHTTP-Referer: https://rubykit.cc\nX-Title: Ask Ruby\n\n` + JSON.stringify({ ...body, tools: body.tools.map((t) => t.function.name) }, null, 1).slice(0, 6000) + "\n\nNo wallet address, no IP header and no cookies are added by Ruby. Your browser connects to openrouter.ai directly, so OpenRouter sees your IP as with any website.";
+    const r = await fetch(OR + "/chat/completions", { method: "POST", headers: { authorization: "Bearer " + key, "content-type": "application/json", "HTTP-Referer": "https://rubykit.cc", "X-Title": "Ask Ruby" }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({})); if (!r.ok || j.error) throw new Error("OpenRouter: " + ((j.error && j.error.message) || "error " + r.status) + (r.status === 401 ? " · the key was refused, check it at openrouter.ai/keys" : r.status === 402 ? " · not enough credit on this key" : r.status === 429 ? " · rate limited, try again in a moment" : ""));
+    return j.choices[0].message; }
+  async function ask() {
+    const q = $("aq").value.trim(); if (!q || busy) return; if (!key) { say("aerr", "Paste your OpenRouter key first. It stays in this browser."); return; }
+    busy = true; $("ago").disabled = true; $("aq").value = ""; $("aprove").hidden = true; lastSources = []; say("auser", md(q)); history.push({ role: "user", content: q });
+    try { put(MODELSTORE, $("amodel").value);
+      for (let round = 0; round < 6; round++) {
+        const wait = say("await", "thinking…"); const m = await complete([{ role: "system", content: SYSTEM }, ...history]); wait.remove();
+        history.push({ role: "assistant", content: m.content || "", ...(m.tool_calls ? { tool_calls: m.tool_calls } : {}) });
+        if (!m.tool_calls || !m.tool_calls.length) { lastAnswer = (m.content || "").trim(); say("abot", md(lastAnswer || "(no answer)")); if (lastAnswer && lastSources.length) $("aprove").hidden = false; break; }
+        for (const tc of m.tool_calls) { const def = TOOLS.find((t) => t[0] === tc.function.name); let a = {}; try { a = JSON.parse(tc.function.arguments || "{}"); } catch {}
+          const args = def ? (def[1] === "radar" ? [a.count] : def[1] === "x402" ? [a.hours] : def[1] === "clip" || def[1] === "pool" ? [a.address] : []) : [];
+          const line = say("atool", `<span class="kp">ruby ›</span> ${esc([def ? def[1] : tc.function.name, ...args.filter((x) => x != null)].join(" "))} <span class="km">reading Robinhood Chain…</span>`);
+          let content; try { if (!def) throw new Error("unknown tool"); const r = await window.RubyConsole.tool(def[1], args.filter((x) => x != null).map(String)); content = JSON.stringify({ data: r.data, sources: r.src, read_at: new Date().toISOString() }, (k, v) => (typeof v === "bigint" ? v.toString() : v));
+            lastSources.push({ tool: def[1], args, result: JSON.parse(content) }); line.querySelector(".km").textContent = "sources " + (r.src || []).join(" · ") + " · live"; }
+          catch (e) { content = JSON.stringify({ error: e.message }); line.querySelector(".km").textContent = "error: " + e.message; }
+          history.push({ role: "tool", tool_call_id: tc.id, content }); } }
+    } catch (e) { say("aerr", esc(e.message)); history.pop(); } finally { busy = false; $("ago").disabled = false; }
+  }
+  $("akeysave").onclick = () => { const v = $("akey").value.trim(); if (!/^sk-or-/.test(v)) { say("aerr", "That doesn't look like an OpenRouter key (they start with sk-or-)."); return; } key = v; $("akey").value = ""; put(KEYSTORE, $("aremember").checked ? key : null); paintKey(); say("ainfo", "Key set. It stays in this browser and is sent only to openrouter.ai."); };
+  $("aforget").onclick = () => { key = ""; put(KEYSTORE, null); paintKey(); say("ainfo", "Key forgotten on this device."); };
+  $("ago").onclick = ask; $("aq").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask(); } });
+  document.querySelectorAll("#achips button").forEach((b) => (b.onclick = () => { $("aq").value = b.textContent; ask(); }));
+  $("anew").onclick = () => { history = []; lastSources = []; $("alog").innerHTML = ""; $("aprove").hidden = true; };
+  $("aprove").onclick = () => { $("qa").value = lastAnswer; $("qs").value = JSON.stringify(lastSources, null, 1); $("qk").value = "ask"; $("qa").dispatchEvent(new Event("input")); const a = document.createElement("a"); a.href = "/proof"; document.body.appendChild(a); a.click(); a.remove(); };
+  let started = false; const api = { start() { if (started) return; started = true; paintKey(); loadModels(); } };
+  if (/\/ask\/?$/.test(location.pathname)) setTimeout(() => api.start(), 0); return api;
 })();
 
 // ---------- R9 x402 Watch: every USDG transferWithAuthorization (EIP-3009) on Robinhood Chain, paired with its transfer ----------
