@@ -218,6 +218,12 @@ a{color:inherit}
 npx -y github:rubykit-star/ruby clip 0x…token
 npx -y github:rubykit-star/ruby pool 0x…pair</div><p class="note2" style="margin-top:10px">The terminal writes each answer as a Markdown note in your vault. Agents get the same tools over MCP.</p></div></div></section>
 <section class="view" id="ask"><div class="page"><div class="ph2"><div class="ey">R13 · AI MODEL</div><h1>Ask any model. <em>It reads the chain.</em></h1><p>Pick one of hundreds of AI models and ask about Robinhood Chain. The model calls Ruby's tools, your browser reads the chain live, and the answer names its sources. Bring your own OpenRouter key: it stays in this browser and goes only to openrouter.ai. Ruby has no server in between.</p></div>
+<style>#ask .wall{margin-top:20px;border:1px solid var(--line);border-radius:6px;background:rgba(10,7,4,.55);padding:14px 0 10px;overflow:hidden}#ask .wh{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:0 16px 10px;flex-wrap:wrap}#ask .wh b{font-size:13px;letter-spacing:.16em;color:#e8be6e}#ask .wh button{font:600 12px "JetBrains Mono",monospace;color:var(--cream);background:transparent;border:1px solid var(--line);border-radius:4px;padding:6px 10px;cursor:pointer}
+#ask .wr{overflow:hidden;padding:5px 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}#ask .wt{display:flex;gap:10px;width:max-content;animation:wl linear infinite}#ask .wt.r{animation-name:wr}@keyframes wl{from{transform:translateX(0)}to{transform:translateX(-50%)}}@keyframes wr{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+#ask .wall:hover .wt,#ask .wall.paused .wt{animation-play-state:paused}@media (prefers-reduced-motion:reduce){#ask .wt{animation:none}#ask .wr{overflow-x:auto}}
+#ask .wc{flex:none;width:236px;text-align:left;display:flex;flex-direction:column;gap:3px;background:linear-gradient(180deg,rgba(58,10,23,.35),rgba(10,7,4,.9));border:1px solid rgba(232,190,110,.25);border-radius:5px;padding:12px 14px;color:var(--cream);font-family:"JetBrains Mono",monospace;cursor:pointer;transition:border-color .2s,transform .2s}#ask .wc:hover{border-color:#e8be6e;transform:translateY(-2px)}#ask .wc.wsel{border-color:#d61f45;box-shadow:0 0 0 2px rgba(214,31,69,.4)}
+#ask .wp{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#e8be6e}#ask .wn{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#ask .wc b{font-size:19px;margin-top:4px}#ask .wc b i{font-style:normal;color:var(--mute)}#ask .wc b.wf{color:#5fd08a}#ask .wc small{font-size:10.5px;color:var(--mute)}#ask .wx{font-size:10.5px;color:var(--mute)}</style>
+<div class="wall"><div class="wh"><b>THE MODELS · LIVE PRICES</b><span class="note2" id="awcount">loading the model list…</span><button type="button" id="awpause">❚❚ Pause</button></div><div id="awall"></div><p class="note2" style="padding:6px 16px 0;margin:0">Prices are OpenRouter's, read live, and billed by OpenRouter to your key. Ruby adds nothing on top. Click a model to use it.</p></div>
 <div class="grid2" style="margin-top:22px;align-items:start;grid-template-columns:minmax(0,2fr) minmax(0,1fr)">
 <div class="kwin" style="margin-top:0"><div class="kbar"><i class="gem"></i><b>ruby ai model</b><span>robinhood chain · mainnet 4663 · tools read only</span><button type="button" id="anew">New chat</button></div>
 <div id="achips"><button type="button">What is the TSLA/USDG pool price right now?</button><button type="button">Show me the latest launches and whether the dev sold.</button><button type="button">How much USDG moved by x402 in the last hour?</button><button type="button">Check the $RUBY token 0x48447ce272824776c7f21d8741dba38ca1586475</button></div>
@@ -1637,6 +1643,34 @@ window.RubyX402 = (() => {
   let started = false; const api = { start() { if (started) return; started = true; boot(); } };
   if (/\/x402\/?$/.test(location.pathname)) setTimeout(() => api.start(), 0); return api;
 })();
+</script>
+<script>
+// ---------- AI Model: a moving wall of the real OpenRouter models, with their live prices. Click one to use it. ----------
+(() => {
+  const $ = (i) => document.getElementById(i); if (!$("awall")) return;
+  const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const TOP = ["anthropic", "openai", "google", "x-ai", "deepseek", "qwen", "mistralai", "meta-llama", "moonshotai", "z-ai", "minimax", "nvidia", "cohere", "amazon", "microsoft"];
+  const money = (x) => (x >= 100 ? x.toFixed(0) : x >= 10 ? x.toFixed(1).replace(/\.0$/, "") : x >= 0.01 ? x.toFixed(2) : x > 0 ? x.toPrecision(2) : "0");
+  const ctx = (n) => (!n ? "" : n >= 1e6 ? (n / 1e6).toFixed(n % 1e6 ? 1 : 0) + "M" : Math.round(n / 1000) + "K");
+  const isFree = (m) => Number((m.pricing || {}).prompt) === 0 && Number((m.pricing || {}).completion) === 0;
+  function card(m) { const p = m.pricing || {}, pi = Number(p.prompt) * 1e6, po = Number(p.completion) * 1e6, prov = (m.id.split("/")[0] || "").replace(/-/g, " "), name = m.name.replace(/^[^:]+:\s*/, "").replace(/\s*\(free\)\s*$/i, "");
+    const price = isFree(m) ? '<b class="wf">FREE</b><small>no credit needed</small>' : isFinite(pi) && isFinite(po) ? `<b>$${money(pi)} <i>/</i> $${money(po)}</b><small>per 1M tokens · in / out</small>` : "<b>–</b><small>price not listed</small>";
+    return `<button type="button" class="wc" data-id="${esc(m.id)}" title="Use ${esc(m.name)}"><span class="wp">${esc(prov)}</span><span class="wn">${esc(name)}</span>${price}<span class="wx">${ctx(m.context_length)}${m.context_length ? " context" : ""}</span></button>`; }
+  function row(list, dir, secs) { if (!list.length) return ""; const inner = list.map(card).join(""); return `<div class="wr"><div class="wt ${dir}" style="animation-duration:${secs}s">${inner}${inner}</div></div>`; }
+  async function build() {
+    let models; try { const j = await (await fetch("https://openrouter.ai/api/v1/models")).json(); models = (j.data || []).filter((m) => (m.supported_parameters || []).includes("tools")); } catch (e) { $("awall").innerHTML = `<p class="note2">Could not load the model list: ${esc(e.message)}</p>`; return; }
+    const free = models.filter(isFree), paid = models.filter((m) => !isFree(m)), prov = (m) => m.id.split("/")[0];
+    const known = paid.filter((m) => TOP.includes(prov(m))).sort((a, b) => (b.created || 0) - (a.created || 0)).slice(0, 26);
+    const rest = paid.filter((m) => !known.includes(m)).sort((a, b) => (b.created || 0) - (a.created || 0)).slice(0, 26);
+    $("awcount").textContent = `${models.length} models that can call Ruby's tools · ${free.length} free · live prices from OpenRouter`;
+    $("awall").innerHTML = row(known, "l", Math.max(60, known.length * 4.2)) + row(free.slice(0, 26), "r", Math.max(50, free.length * 4.6)) + row(rest, "l", Math.max(60, rest.length * 4.4));
+    $("awall").querySelectorAll(".wc").forEach((b) => (b.onclick = () => { const s = $("amodel"); if (!s) return; if (![...s.options].some((o) => o.value === b.dataset.id)) return; s.value = b.dataset.id; s.dispatchEvent(new Event("change")); $("aq") && $("aq").focus({ preventScroll: true }); document.querySelector("#ask .kwin").scrollIntoView({ behavior: "smooth", block: "start" }); b.classList.add("wsel"); setTimeout(() => b.classList.remove("wsel"), 1200); })); }
+  $("awpause").onclick = () => { const on = $("awall").classList.toggle("paused"); $("awpause").textContent = on ? "▶ Play" : "❚❚ Pause"; };
+  let started = false; const go = () => { if (started) return; started = true; build(); };
+  if (/\/ask\/?$/.test(location.pathname)) go(); addEventListener("popstate", () => { if (/\/ask\/?$/.test(location.pathname)) go(); });
+  document.addEventListener("click", (e) => { const a = e.target.closest('a[href="/ask"]'); if (a) setTimeout(go, 50); });
+})();
+
 </script>
 </body>
 </html>
